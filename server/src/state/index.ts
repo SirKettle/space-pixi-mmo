@@ -1,4 +1,4 @@
-import { IServerState } from "../types";
+import { IServerState } from '../types';
 
 // =======================================================================================
 // Memory storage for (temporary) data persistence
@@ -11,4 +11,8 @@ export const serverState: IServerState = {
   userInput: {},
   deltaMs: 0,
   prevUpdateTime: Date.now(),
-}
+  gameState: {
+    players: [],
+    actors: [],
+  },
+};

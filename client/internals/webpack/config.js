@@ -12,8 +12,6 @@ const pkg = require(path.resolve(rootDirPath, 'package.json'));
 const clientDirPath = path.resolve(rootDirPath, 'client');
 const srcDirPath = path.resolve(clientDirPath, 'src');
 
-console.log(srcDirPath)
-
 // access env vars
 DotEnv.config({ path: path.resolve(rootDirPath, '.env') });
 
@@ -46,11 +44,21 @@ module.exports = (_env, argv) => {
     module: {
       rules: [
         { test: /\.(png|jpe?g|gif)$/i, use: [{ loader: 'file-loader' }] },
-        { test: /\.(ts|js)x?$/, exclude: '/node_modules', use: { loader: 'babel-loader' } }
-      ]
+        {
+          test: /\.(ts|js)x?$/,
+          exclude: '/node_modules',
+          use: { loader: 'babel-loader' },
+        },
+      ],
     },
-    plugins: plugins({ srcDirPath, clientDirPath, isDevelopment, analyzeBundles, pkg })
-  }
+    plugins: plugins({
+      srcDirPath,
+      clientDirPath,
+      isDevelopment,
+      analyzeBundles,
+      pkg,
+    }),
+  };
 
   return config;
-}
+};

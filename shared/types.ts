@@ -1,3 +1,15 @@
+// BASIC TYPES and SHAPES
+export interface IPoint {
+  x: number;
+  y: number;
+}
+
+export interface IRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export enum EInputAction {
   FORWARD = 'FORWARD',
@@ -10,33 +22,21 @@ export enum EInputAction {
   FIRE_2 = 'FIRE_2',
 }
 
+export enum ETextureKey {
+  CRAFT_DEFAULT,
+  CRAFT_LEFT,
+  CRAFT_RIGHT,
+}
 export interface IUser {
   username: string;
 }
 
-export interface IPoint {
-  x: number;
-  y: number;
-}
-
-export interface IActor {
-  isHuman: boolean;
-  user?: IUser;
-  position: IPoint;
-}
-
-export interface IGameUpdate {
-  deltaMs: number;
-  timeElapsedMs: number;
-  actors: IActor[];
-}
-
 export interface IRenderActor {
   position: IPoint;
-  type: string;
-  health: string;
-  direction: number;
-  scale?: number;
+  texture: ETextureKey;
+  health: number; // percentage
+  direction: number; // radian value
+  scale?: number; // percentage - default to 1
 }
 
 export interface IDebugInfo {
@@ -54,6 +54,7 @@ export interface IGameRenderUpdate {
   debug?: Record<string, any>;
 }
 
+// API contract
 
 export interface IClientToServerEvents {
   login: () => void;
@@ -79,7 +80,7 @@ export interface IInterServerEvents {
 export interface IServerToClientEvents {
   // latency / testing
   pingTestResponse: (startTimestamp: number) => void;
-  
+
   // game state update
   update: (data: IGameRenderUpdate) => void;
 
@@ -90,12 +91,4 @@ export interface IServerToClientEvents {
 
   // examples
   // withAck: (d: string, callback: (e: number) => void) => void;
-}
-
-export interface IUser {
-  username: string;
-}
-
-// Memory storage for (temporary) data persistence
-export interface IGameSnapshot {
 }
