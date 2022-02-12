@@ -1,5 +1,5 @@
 // BASIC TYPES and SHAPES
-export interface IPoint {
+export interface IVector {
   x: number;
   y: number;
 }
@@ -32,10 +32,11 @@ export interface IUser {
 }
 
 export interface IRenderActor {
-  position: IPoint;
-  texture: ETextureKey;
+  position: IVector;
+  assetKey: string;
+  frameTextureKey: ETextureKey;
   health: number; // percentage
-  direction: number; // radian value
+  rotation: number; // radian value
   scale?: number; // percentage - default to 1
 }
 
@@ -46,7 +47,7 @@ export interface IDebugInfo {
 }
 
 export interface IGameRenderUpdate {
-  cameraOffset: IPoint;
+  cameraOffset: IVector;
   actors: IRenderActor[];
   fwdThrst?: number;
   trnThrst?: number;

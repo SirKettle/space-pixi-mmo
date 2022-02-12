@@ -12,18 +12,18 @@ const defaultButtonState: IButtonState = {
   status: EButtonStatus.INACTIVE,
 };
 
-const defaultUserInputState: IUserInputState = {
+const defaultUserInputState = (): IUserInputState => ({
   fire1: { ...defaultButtonState },
   activeActions: [],
   forwardThruster: 0,
   turnThruster: 0,
   strafeThruster: 0,
-};
+});
 
 export const handleKeyDown = (socket: TClient) => (action: T.EInputAction) => {
   if (!serverState.userInput[socket.id]) {
     console.log('keyDown init user input');
-    serverState.userInput[socket.id] = { ...defaultUserInputState };
+    serverState.userInput[socket.id] = defaultUserInputState();
   }
 
   const userInput = serverState.userInput[socket.id];
@@ -61,7 +61,7 @@ export const handleKeyDown = (socket: TClient) => (action: T.EInputAction) => {
 export const handleKeyUp = (socket: TClient) => (action: T.EInputAction) => {
   if (!serverState.userInput[socket.id]) {
     console.log('keyUp init user input');
-    serverState.userInput[socket.id] = { ...defaultUserInputState };
+    serverState.userInput[socket.id] = defaultUserInputState();
   }
 
   const userInput = serverState.userInput[socket.id];
@@ -124,4 +124,12 @@ export const updateUserInput = () => {
       clientUserInput.fire1 = { ...defaultButtonState };
     }
   });
+};
+
+export const resetUserInput = (clientId: string) => {
+  serverState.userInput[clientId] = defaultUserInputState();
+
+  console.log('resett user input for ', clientId);
+  console.log(serverState.userInput);
+  console.log(defaultUserInputState());
 };

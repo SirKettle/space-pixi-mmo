@@ -5,10 +5,33 @@ export const subscribeToInputEvents = (socket: TSocket) => {
   const joinBtn = document.getElementById('joinBtn');
   const leaveBtn = document.getElementById('leaveBtn');
 
-  function handleKey(key: string, inputAction: 'keyDown' | 'keyUp') {
-    switch (key.toLowerCase()) {
+  function handleKey(e: KeyboardEvent, inputAction: 'keyDown' | 'keyUp') {
+    const key = e.key.toLowerCase();
+    const keysToHandle = [
+      ' ',
+      'arrowleft',
+      'arrowright',
+      'arrowup',
+      'arrowdown',
+      'a',
+      'w',
+      's',
+      'd',
+    ];
+    if (!keysToHandle.includes(key)) {
+      return;
+    }
+
+    e.preventDefault();
+
+    if (e.repeat) {
+      return;
+    }
+
+    switch (e.key.toLowerCase()) {
       case ' ':
         socket.emit(inputAction, T.EInputAction.FIRE_1);
+
         return;
       case 'arrowleft':
       case 'a':
@@ -30,15 +53,12 @@ export const subscribeToInputEvents = (socket: TSocket) => {
   }
 
   console.log('add key event listeners');
-  window.addEventListener('keydown', (ev) => {
-    if (ev.repeat) {
-      return;
-    }
-    handleKey(ev.key, 'keyDown');
+  window.addEventListener('keydown', (e) => {
+    handleKey(e, 'keyDown');
   });
 
-  window.addEventListener('keyup', (ev) => {
-    handleKey(ev.key, 'keyUp');
+  window.addEventListener('keyup', (e) => {
+    handleKey(e, 'keyUp');
   });
 
   joinBtn?.addEventListener('click', () => {

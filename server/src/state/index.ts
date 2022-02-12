@@ -9,6 +9,7 @@ export const serverState: IServerState = {
   gamePaused: false,
   clients: [],
   userInput: {},
+  delta: 0,
   deltaMs: 0,
   prevUpdateTime: Date.now(),
   gameState: {

@@ -15,7 +15,7 @@ export const clientState: IClientState = {
 
 export const settings: ISettings = {
   chunkSize: 256,
-  chunkRatio: [3, 2],
+  chunkRatio: [4, 3],
 };
 
 export const updatePixiState = (delta: number, deltaMS: number) => {

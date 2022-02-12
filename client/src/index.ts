@@ -2,14 +2,15 @@ import 'regenerator-runtime/runtime';
 import { logGameCredits } from '~utils/log';
 import { connectToServer, startPinging } from '~api';
 import { subscribeToInputEvents } from '~input';
-import { initGame } from '~game';
+import { preInitGame, initGame } from '~game';
 
 logGameCredits();
 
+preInitGame();
 connectToServer().then((socket) => {
+  initGame();
   startPinging(socket);
   subscribeToInputEvents(socket);
-  initGame();
 });
 
 // console.log(1);

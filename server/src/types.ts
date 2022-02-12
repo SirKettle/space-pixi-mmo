@@ -21,8 +21,19 @@ export interface IClient {
   startedISO: string; // 2022-01-31T12:00:00.000Z
 }
 
+export interface IActor extends T.IRenderActor {
+  uid: string;
+  isBullet: boolean;
+  velocity: T.IVector;
+  shield: number;
+  life: number;
+  mass: number;
+  fuelCapacity: number;
+  rotationSpeed?: number;
+}
+
 // convenience - todo: optimize - should prob use playerToRenderActor func
-export interface IPlayerState extends T.IRenderActor {
+export interface IPlayerState extends IActor {
   clientId: string;
 }
 
@@ -38,6 +49,7 @@ export interface IServerState {
   clients: IClient[];
   userInput: Record<string, IUserInputState>;
   deltaMs: number; // last delta ms between updates
+  delta: number; // 1 = 60 updates per scond
   prevUpdateTime: number; // timestamp
   gameState: IServerGameState;
 }

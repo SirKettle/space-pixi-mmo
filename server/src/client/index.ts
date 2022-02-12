@@ -2,10 +2,13 @@ import { IClient, TClient, TIOServer } from '../types';
 import { serverState } from '../state';
 import { gameLoop } from '../game';
 import { generateUsername } from '../utils';
-import { handleKeyDown, handleKeyUp } from './input';
+import { handleKeyDown, handleKeyUp, resetUserInput } from './input';
 
 export const handleDisconnect = (io: TIOServer, client: IClient) => () => {
-  console.log(`user disconnected: ${client.user.username}`);
+  console.log(
+    `user disconnected: ${client.user.username} (${client.socket.id})`
+  );
+  resetUserInput(client.socket.id);
   // Remove the current client
   serverState.clients = serverState.clients.filter(
     (s) => s.user.username !== client.user.username
@@ -26,6 +29,7 @@ export const handleDisconnect = (io: TIOServer, client: IClient) => () => {
 
 export const handleJoinGame = (io: TIOServer, client: IClient) => () => {
   client.inGame = true;
+
   if (!serverState.gameRunning) {
     serverState.gameRunning = true;
     gameLoop();
@@ -56,7 +60,10 @@ export const handleConnection = (io: TIOServer) => (socket: TClient) => {
     },
   };
 
+  console.log(`user connected: ${client.user.username} (${client.socket.id})`);
+
   serverState.clients.push(client);
+  resetUserInput(client.socket.id);
 
   // broadcast to all other users
   socket.broadcast.emit('playerJoined', client.user);

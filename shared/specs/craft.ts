@@ -35,7 +35,7 @@ export interface ICraftSpec {
 
 export const spacecraft: ICraftSpec = {
   thrust: {
-    forward: 1,
+    forward: 0.2,
     reverse: 0.1,
     side: 0.05,
     turn: 0.5,

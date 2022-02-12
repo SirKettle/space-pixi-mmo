@@ -1,9 +1,9 @@
 const MAX_RADIANS = Math.PI * 2;
 
-export function getVelocity({ speed = 0, direction = 0 }) {
+export function getVelocity({ speed = 0, rotation = 0 }) {
   return {
-    x: Math.sin(direction) * speed,
-    y: -(Math.cos(direction) * speed),
+    x: Math.sin(rotation) * speed,
+    y: -(Math.cos(rotation) * speed),
   };
 }
 

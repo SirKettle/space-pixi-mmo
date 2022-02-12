@@ -1,7 +1,17 @@
-import { Application, BaseTexture, Sprite, Texture, Rectangle } from 'pixi.js';
+import {
+  Application,
+  BaseTexture,
+  Container,
+  Sprite,
+  Texture,
+  Rectangle,
+  TilingSprite,
+} from 'pixi.js';
 import { clientState, settings, updatePixiState } from '~state';
 import { renderDebug } from '~debug';
 import { getCraftSpec } from '~utils/spritesheet';
+import { starsParallax } from '~utils/parallax';
+import { defaultVector } from '../../../shared/utils/physics';
 
 const craftSpec = getCraftSpec('spacecraft');
 
@@ -13,34 +23,99 @@ const loadAssets = async (urls: string[]) => {
 // let sprite1 = new PIXI.Sprite(texture);
 // let sprite2 = new PIXI.Sprite(texture);
 
-export async function initGame() {
+let app: Application;
+
+export const preInitGame = () => {
   const gameEl = document.querySelector('canvas');
   if (!gameEl) {
     return;
   }
 
-  const [craftTexture] = await loadAssets([craftSpec.imageUrl]);
+  const gameWrapperEl = document.getElementById('gameWrapper');
+  if (gameWrapperEl) {
+    gameWrapperEl.style.aspectRatio = `${settings.chunkRatio[0]} / ${settings.chunkRatio[1]}`;
+  }
 
-  const app = new Application({
+  app = new Application({
     view: gameEl,
     resolution: window.devicePixelRatio,
     autoDensity: true,
     width: settings.chunkSize * settings.chunkRatio[0], // * (isMobile ? 2 : 1),
     height: settings.chunkSize * settings.chunkRatio[1], // * (isMobile ? 2 : 1),);
   });
+};
+
+export async function initGame() {
+  if (!app) {
+    return;
+  }
+
+  const [craftTexture] = await loadAssets([craftSpec.imageUrl]);
+
+  const base = new Container();
+  const background = new Container();
+  const world = new Container();
+  const foreground = new Container();
+  app.stage.addChild(base);
+  app.stage.addChild(background);
+  app.stage.addChild(world);
+  app.stage.addChild(foreground);
+
+  // const spaceBgImage = '../static/assets/images/tiles/space_bg.png';
+
+  const parallax = starsParallax.map((config) => {
+    const sprite = TilingSprite.from(config.url, {
+      width: app.screen.width,
+      height: app.screen.height,
+    });
+    sprite.alpha = config.alpha;
+    sprite.position.set(0, 0);
+    sprite.scale.set(config.scale);
+
+    return {
+      config,
+      sprite,
+    };
+  });
+
+  parallax.forEach((p) => {
+    if (p.config.parallax > 1) {
+      foreground.addChild(p.sprite);
+    } else {
+      background.addChild(p.sprite);
+    }
+  });
+
+  // const baseBackground = TilingSprite.from(spaceBgImage, {
+  //   width: app.screen.width,
+  //   height: app.screen.height,
+  // });
+
+  // base.addChild(baseBackground);
 
   function mainLoop(delta: number) {
     updatePixiState(delta, app.ticker.elapsedMS);
     renderDebug();
 
-    app.stage.removeChildren();
+    const cameraOffset = {
+      ...defaultVector,
+      ...clientState.gameState?.cameraOffset,
+    };
+
+    parallax.forEach((p) => {
+      p.sprite.tilePosition.set(
+        -cameraOffset.x * (p.config.parallax / p.config.scale),
+        -cameraOffset.y * (p.config.parallax / p.config.scale)
+      );
+    });
+
+    world.removeChildren();
 
     if (clientState.gameState?.actors.length) {
       clientState.gameState?.actors.forEach((a) => {
         // const sprite = new Sprite('/static/ase');
-        a.texture;
 
-        const f = craftSpec.frames.find((f) => f.key === a.texture);
+        const f = craftSpec.frames.find((f) => f.key === a.frameTextureKey);
 
         if (f) {
           const t = new Texture(
@@ -49,14 +124,14 @@ export async function initGame() {
           );
           const sprite = new Sprite(t);
           sprite.position.set(
-            a.position.x + app.screen.width / 2,
-            a.position.y + app.screen.height / 2
+            a.position.x + app.screen.width / 2 - cameraOffset.x,
+            a.position.y + app.screen.height / 2 - cameraOffset.y
           );
           sprite.anchor.set(0.5);
           sprite.scale.set(1);
-          sprite.rotation = a.direction;
+          sprite.rotation = a.rotation;
 
-          app.stage.addChild(sprite);
+          world.addChild(sprite);
         }
       });
     }

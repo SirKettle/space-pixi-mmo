@@ -50,9 +50,9 @@ export const renderDebug = () => {
   ${(clientState.gameState?.actors || []).map((a, i) => {
     return `<h3>Actor ${i + 1}</h3><p>x: ${a.position.x}, y: ${
       a.position.y
-    }</p><p>health: ${a.health}, direction: ${a.direction}</p><p>scale: ${
+    }</p><p>health: ${a.health}, rotation: ${a.rotation}</p><p>scale: ${
       a.scale
-    }, texture: ${a.texture.toString()}</p>`;
+    }, texture: ${a.frameTextureKey.toString()}</p>`;
   })}
   `;
 };
