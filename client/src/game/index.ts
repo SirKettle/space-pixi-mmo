@@ -2,21 +2,61 @@ import {
   Application,
   BaseTexture,
   Container,
+  Loader,
   Sprite,
   Texture,
   Rectangle,
   TilingSprite,
 } from 'pixi.js';
+import fontDashDisplay from '../static/assets/font/digital7_mono_white.xml';
 import { clientState, settings, updatePixiState } from '~state';
 import { renderDebug } from '~debug';
 import { getCraftSpec } from '~utils/spritesheet';
 import { starsParallax } from '~utils/parallax';
 import { defaultVector } from '../../../shared/utils/physics';
+import { drawCircle } from '~utils/graphics';
+import {
+  BLUE,
+  BLUE2,
+  GREEN,
+  GREENY_BLUE,
+  RED,
+  YELLOW,
+} from '../../../shared/constants/color';
+import { healthColor } from '~utils/colors';
+import { crafts } from '../../../shared/specs/craft';
+import { updateDash } from './dash';
+import { IVector } from '../../../shared/types';
 
-const craftSpec = getCraftSpec('spacecraft');
+const loader = Loader.shared;
 
-const loadAssets = async (urls: string[]) => {
-  return Promise.all(urls.map((url) => new BaseTexture(url)));
+const loadAssets = async () => {
+  console.log('load fonts and other assets');
+  loader.add('fontDisplay', fontDashDisplay);
+  return new Promise((resolve) => {
+    loader.load(() => {
+      console.log('fonts and other assets loaded!');
+      resolve(void 0);
+    });
+  });
+};
+
+const loadCraftTextures = async (c: typeof crafts) => {
+  const craftKeys = Object.keys(c);
+  const craftImageUrls = craftKeys.map(
+    (key) => getCraftSpec(key as keyof typeof crafts).imageUrl
+  );
+  const textures = await Promise.all(
+    craftImageUrls.map((imageUrl) => new BaseTexture(imageUrl))
+  );
+
+  return craftKeys.reduce(
+    (acc, key, i) => ({
+      ...acc,
+      [key as keyof typeof crafts]: textures[i],
+    }),
+    {}
+  ) as Record<keyof typeof crafts, BaseTexture>;
 };
 
 //   baseTextureInfo.texture, new Rectangle(x, y, width, height)ture = PIXI.Texture.from('assets/image.png');
@@ -30,9 +70,11 @@ export const preInitGame = () => {
   if (!gameEl) {
     return;
   }
+  console.log('gameEl found');
 
   const gameWrapperEl = document.getElementById('gameWrapper');
   if (gameWrapperEl) {
+    console.log('gameWrapperEl found');
     gameWrapperEl.style.aspectRatio = `${settings.chunkRatio[0]} / ${settings.chunkRatio[1]}`;
   }
 
@@ -47,19 +89,32 @@ export const preInitGame = () => {
 
 export async function initGame() {
   if (!app) {
+    console.log('no app found');
     return;
   }
+  // if (!clientState.craftKey) {
+  //   console.log('no craft key selected');
+  //   return;
+  // }
 
-  const [craftTexture] = await loadAssets([craftSpec.imageUrl]);
+  await loadAssets();
+  const craftTextures = await loadCraftTextures(crafts);
+
+  // const [craftTexture] = await loadAssets([craftSpec.imageUrl]);
+  console.log('assets loaded');
 
   const base = new Container();
   const background = new Container();
   const world = new Container();
+  const dash = new Container();
+  const debug = new Container();
   const foreground = new Container();
   app.stage.addChild(base);
   app.stage.addChild(background);
   app.stage.addChild(world);
+  app.stage.addChild(dash);
   app.stage.addChild(foreground);
+  app.stage.addChild(debug);
 
   // const spaceBgImage = '../static/assets/images/tiles/space_bg.png';
 
@@ -95,11 +150,16 @@ export async function initGame() {
 
   function mainLoop(delta: number) {
     updatePixiState(delta, app.ticker.elapsedMS);
-    renderDebug();
+    renderDebug(debug);
 
-    const cameraOffset = {
+    const cameraOffset: IVector = {
       ...defaultVector,
       ...clientState.gameState?.cameraOffset,
+    };
+
+    const screenCameraOffset: IVector = {
+      x: app.screen.width / 2 - cameraOffset.x,
+      y: app.screen.height / 2 - cameraOffset.y,
     };
 
     parallax.forEach((p) => {
@@ -109,30 +169,75 @@ export async function initGame() {
       );
     });
 
+    dash.removeChildren();
     world.removeChildren();
 
     if (clientState.gameState?.actors.length) {
       clientState.gameState?.actors.forEach((a) => {
+        const isPlayer = a.isYou || false;
         // const sprite = new Sprite('/static/ase');
+
+        // a.assetKey
+
+        const craftSpec = getCraftSpec(a.assetKey);
 
         const f = craftSpec.frames.find((f) => f.key === a.frameTextureKey);
 
         if (f) {
           const t = new Texture(
-            craftTexture,
+            craftTextures[a.assetKey],
             new Rectangle(f.rect.x, f.rect.y, f.rect.width, f.rect.height)
           );
           const sprite = new Sprite(t);
-          sprite.position.set(
-            a.position.x + app.screen.width / 2 - cameraOffset.x,
-            a.position.y + app.screen.height / 2 - cameraOffset.y
-          );
+          const x = a.position.x + screenCameraOffset.x;
+          const y = a.position.y + screenCameraOffset.y;
+          const spritePosition = { x, y };
+          sprite.position.set(x, y);
           sprite.anchor.set(0.5);
           sprite.scale.set(1);
           sprite.rotation = a.rotation;
-
           world.addChild(sprite);
+
+          updateDash({
+            world: dash,
+            position: spritePosition,
+            screenCameraOffset,
+            actor: a,
+            craftSpec,
+            isPlayer,
+          });
+
+          // TODO;nearestPlayer
+
+          // const hitCircle = drawCircle({
+          //   x,
+          //   y,
+          //   lineWidth: 1,
+          //   lineColor: GREEN,
+          //   lineAlpha: 0.3,
+          //   radius: craftSpec.radius,
+          // });
+          // world.addChild(hitCircle);
         }
+      });
+    }
+
+    if (clientState.gameState?.bullets.length) {
+      clientState.gameState?.bullets.forEach((b) => {
+        const x = b.position.x + screenCameraOffset.x;
+        const y = b.position.y + screenCameraOffset.y;
+        const bullet = drawCircle({
+          x,
+          y,
+          fillColor: GREENY_BLUE,
+          fillAlpha: Math.min(1, b.life),
+          radius: b.radius,
+          lineWidth: 0,
+          // lineColor: BLUE,
+          // lineAlpha: 0.8,
+        });
+
+        world.addChild(bullet);
       });
     }
 

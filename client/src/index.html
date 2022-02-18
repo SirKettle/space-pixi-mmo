@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pixi One" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="favicon.png" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <link rel="apple-touch-startup-image" href="favicon.png" />
+    <link href="static/reset.css" rel="stylesheet" />
+    <link href="static/main.css" rel="stylesheet" />
+  </head>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Pixi One" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <link rel="shortcut icon" href="favicon.png" />
-  <link rel="apple-touch-icon" href="favicon.png" />
-  <link rel="apple-touch-startup-image" href="favicon.png" />
-  <link href="static/reset.css" rel="stylesheet" />
-  <link href="static/main.css" rel="stylesheet" />
-</head>
-
-<body>
-  <div id="gameWrapper" class="game-wrapper disable-selection disable-dbl-tap-zoom">
-    <canvas id="game" class="disable-selection disable-dbl-tap-zoom"></canvas>
-    <div id="virtual_gamepad" class="virtual-gamepad disable-selection disable-dbl-tap-zoom">
-      <div id="virtual_joystick" class="virtual-joystick disable-selection disable-dbl-tap-zoom"></div>
+  <body>
+    <div
+      id="gameWrapper"
+      class="game-wrapper disable-selection disable-dbl-tap-zoom"
+    >
+      <canvas id="game" class="disable-selection disable-dbl-tap-zoom"></canvas>
+      <div
+        id="virtual_gamepad"
+        class="virtual-gamepad disable-selection disable-dbl-tap-zoom"
+      >
+        <div
+          id="virtual_joystick"
+          class="virtual-joystick disable-selection disable-dbl-tap-zoom"
+        ></div>
+      </div>
     </div>
-  </div>
-  <div id="debug" class="debug"></div>
-  <div class="actions">
-    <button id="joinBtn">Join game</button>
-    <button id="leaveBtn">Leave game</button>
-  </div>
-</body>
-
+    <div class="actions">
+      <button id="joinBtn">Join as Fighter</button>
+      <button id="join2Btn">Join as Dumper Craft</button>
+      <button id="leaveBtn">Leave game</button>
+    </div>
+  </body>
 </html>

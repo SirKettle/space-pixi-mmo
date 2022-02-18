@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io-client';
+import { crafts } from '../../shared/specs/craft';
 import * as T from '../../shared/types';
 
 export type TSocket = Socket<T.IServerToClientEvents, T.IClientToServerEvents>;
@@ -15,6 +16,7 @@ export interface IPixiAppState {
   fps: number;
   ticks: number;
   bigTicks: number;
+  sinVariant: number;
 }
 
 export interface IClientState {
@@ -25,4 +27,5 @@ export interface IClientState {
   pingRoundtripMs?: number;
   gameState?: T.IGameRenderUpdate;
   pixiState: IPixiAppState;
+  craftKey?: keyof typeof crafts;
 }

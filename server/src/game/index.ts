@@ -1,10 +1,20 @@
 import { serverState } from '../state';
 import { updateUserInput } from '../client/input';
 import { playerToRender, updateAllPlayers } from './players';
-import { ETextureKey } from '../../../shared/types';
+import {
+  ETextureKey,
+  IBullet,
+  IRenderActor,
+  IVector,
+} from '../../../shared/types';
 import { getRandomInt } from '../../../shared/utils/random';
-import { defaultVector } from '../../../shared/utils/physics';
-import { initActor } from './actor';
+import {
+  defaultVector,
+  getDirection,
+  getDistance,
+} from '../../../shared/utils/physics';
+import { initActor, updateBullet } from './actor';
+import { handleCollisions } from './collision';
 
 export function gameLoop() {
   const prevUpdateTime = Date.now();
@@ -18,10 +28,23 @@ export function gameLoop() {
   updateUserInput();
 
   if (!serverState.gamePaused) {
+    // update stuff here for all clients
     updateAllPlayers();
+
+    serverState.gameState.bullets = serverState.gameState.bullets
+      .map(updateBullet)
+      .filter((b) => b.life > 0);
+
+    // handle collisions
+    handleCollisions();
+
+    // ai etc
+
+    // emit to clients/players
     serverState.clients
       .filter((c) => c.inGame)
       .forEach((c) => {
+        // client specific code here
         const clientId = c.socket.id;
         const clientUserInput = serverState.userInput[clientId];
         let player = serverState.gameState.players.find(
@@ -29,22 +52,15 @@ export function gameLoop() {
         );
 
         if (!player) {
-          // init new player
-          console.log('new player for ', clientId);
-          player = {
-            clientId,
-            ...initActor({
-              assetKey: 'spacecraft',
-              overrides: {
-                position: {
-                  x: getRandomInt(-300, 300),
-                  y: getRandomInt(-150, 150),
-                },
-              },
-            }),
-          };
-          serverState.gameState.players.push(player);
+          // should we continue to emit to player?
+          // maybe follow the player that killed them??
+          return;
         }
+
+        const players = serverState.gameState.players.map((p) => ({
+          ...p,
+          isYou: p.clientId === clientId ? true : undefined,
+        }));
 
         // export function updateCamera(game) {
         //   const player = game.player;
@@ -55,16 +71,49 @@ export function gameLoop() {
         //   world.pivot.x += (player.data.x - world.pivot.x) * 0.15;
         //   world.pivot.y += (player.data.y - world.pivot.y) * 0.15;
         // }
+        const cameraOffset = { ...player.position }; // todo make this like above (following player)
+
+        const shouldRender =
+          (camOffset: IVector) => (obj: IBullet | IRenderActor) =>
+            getDistance(camOffset, obj.position) < 700;
+
+        const otherPlayers = players
+          .filter((p) => p.clientId !== clientId)
+          .map((p) => ({
+            ...p,
+            distanceFromPlayer: getDistance(player?.position, p.position),
+          }))
+          .sort((a, b) => {
+            return a.distanceFromPlayer > b.distanceFromPlayer ? 1 : -1;
+          });
+
+        const nearestPlayer = otherPlayers[0];
+
+        // const closestTarget = [... =].sort((a,b) => {
+        //   return getDistance(player.position, a)
+        // })
 
         c.socket.emit('update', {
-          cameraOffset: { ...player.position }, // follow player for now
-          actors: serverState.gameState.players.map(playerToRender), // will want to filter this to only in view later on
-          // actors: [
-          //   playerToRender(player)
-          // ], // filtered by what is inside user's display (todo this would need to emit separately to each client)
+          cameraOffset,
+          actors: players
+            .map(playerToRender)
+            .filter(shouldRender(cameraOffset)), // will want to filter this to only in view later on
+          bullets: serverState.gameState.bullets.filter(
+            shouldRender(cameraOffset)
+          ), // will want to filter this to only in view later on
           fire1: clientUserInput?.fire1.downMs || 0,
           fwdThrst: clientUserInput?.forwardThruster || 0,
           trnThrst: clientUserInput?.turnThruster || 0,
+          nearestTarget: nearestPlayer
+            ? {
+                distance: nearestPlayer.distanceFromPlayer,
+                direction: getDirection(
+                  player.position,
+                  nearestPlayer.position
+                ),
+                position: nearestPlayer.position,
+              }
+            : undefined,
           debug: {
             serverDeltaMs: { value: deltaMs },
             userInputs: serverState.userInput,

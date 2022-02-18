@@ -4,13 +4,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "es2017",
-      "es2019"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "es2017", "es2019"],
     "allowJs": true,
     "jsx": "react",
     "noEmit": true,
@@ -23,17 +17,11 @@
     "skipLibCheck": false,
     "baseUrl": ".",
     "paths": {
-      "~*": [
-        "./src/*"
-      ]
-    }
+      "~*": ["./src/*"]
+    },
+    // Other configuration...
+    "typeRoots": ["../shared/declarations.d.ts"]
   },
-  "include": [
-    "src",
-    "../shared"
-  ],
-  "exclude": [
-    "node_modules",
-    "internals"
-  ]
+  "include": ["src", "../shared"],
+  "exclude": ["node_modules", "internals"]
 }

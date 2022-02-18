@@ -26,10 +26,11 @@ export interface IActor extends T.IRenderActor {
   isBullet: boolean;
   velocity: T.IVector;
   shield: number;
-  life: number;
   mass: number;
+  power?: number; // collision power
   fuelCapacity: number;
   rotationSpeed?: number;
+  radius: number;
 }
 
 // convenience - todo: optimize - should prob use playerToRenderActor func
@@ -40,6 +41,7 @@ export interface IPlayerState extends IActor {
 export interface IServerGameState {
   players: IPlayerState[];
   actors: T.IRenderActor[];
+  bullets: T.IBullet[];
 }
 
 // Memory storage for (temporary) data persistence

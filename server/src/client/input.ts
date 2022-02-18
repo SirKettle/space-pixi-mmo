@@ -6,6 +6,7 @@ import {
   TClient,
 } from '../types';
 import { serverState } from '../state';
+import { getVelocity } from '../../../shared/utils/physics';
 
 const defaultButtonState: IButtonState = {
   downMs: 0,
@@ -121,6 +122,28 @@ export const updateUserInput = () => {
         clientUserInput.fire1.downMs + serverState.deltaMs;
     }
     if (clientUserInput.fire1.status === EButtonStatus.UP) {
+      const player = serverState.gameState.players.find(
+        (p) => p.clientId === clientId
+      );
+      if (player) {
+        player.shots = (player.shots || 0) + 1;
+        const firePower =
+          Math.min(1, clientUserInput.fire1.downMs / 500) * 0.8 + 0.2;
+        const speed = 10 + firePower * 10;
+        const velocity = getVelocity({ speed, rotation: player.rotation });
+        serverState.gameState.bullets.push({
+          isBullet: true,
+          position: { ...player.position },
+          velocity,
+          rotation: 0,
+          firedBy: player.clientId,
+          life: 2 + firePower * 2,
+          power: firePower * 50,
+          mass: firePower * 5,
+          radius: 10 * (0.25 + firePower * 0.75),
+        });
+        console.log('FIRE', clientUserInput.fire1.downMs, speed);
+      }
       clientUserInput.fire1 = { ...defaultButtonState };
     }
   });
@@ -130,6 +153,4 @@ export const resetUserInput = (clientId: string) => {
   serverState.userInput[clientId] = defaultUserInputState();
 
   console.log('resett user input for ', clientId);
-  console.log(serverState.userInput);
-  console.log(defaultUserInputState());
 };

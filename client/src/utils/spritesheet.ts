@@ -29,10 +29,17 @@ export const getFrameRects = ({
 
 // import imgUrl from '../static/assets/images/craft_spritesheet.png';
 
+const getCraftImageUrl = (craftKey: keyof typeof crafts): string => {
+  return {
+    spacecraft: '../static/assets/images/sprites/craft_spritesheet.png',
+    spaceDumper: '../static/assets/images/sprites/garbage-ship-one100x84.png',
+  }[craftKey];
+};
+
 // console.log(imgUrl);
 export const getCraftSpec = (craftKey: keyof typeof crafts): ICraftSpec => {
   return {
     ...crafts[craftKey],
-    imageUrl: '../static/assets/images/craft_spritesheet.png',
+    imageUrl: getCraftImageUrl(craftKey),
   };
 };

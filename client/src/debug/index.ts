@@ -1,58 +1,60 @@
+import { Container } from '@pixi/display';
+import { BitmapText } from 'pixi.js';
 import { clientState } from '~state';
+import { BLUE, GREEN } from '../../../shared/constants/color';
 import { logMeter, logThrust } from '../../../shared/utils/log';
 
-export const renderDebug = () => {
-  const debugEl = document.getElementById('debug');
-  if (!debugEl) {
-    return;
-  }
+export const renderDebug = (container: Container) => {
+  container.removeChildren();
 
-  debugEl.innerHTML = `
-  <p>.....connected | ${clientState.connected}</p>
-  <p>${logMeter({
-    key: '.......ping ms',
-    value: clientState.pingMs || 0,
-    max: 30,
-    formattedValue: `${clientState.pingMs}ms (${clientState.pingRoundtripMs}ms)`,
-  })}</p>
-  <p>${logMeter({
-    key: '........F.P.S.',
-    value: clientState.pixiState.fps,
-    max: 75,
-  })}</p>
-  <p>${logMeter({
-    key: '......delta ms',
-    value: Math.round(clientState.pixiState.deltaMs),
-    max: 20,
-  })}</p>
-  <p>${logMeter({
-    key: '...fire one ms',
-    value: clientState.gameState?.fire1 || 0,
-    max: 500,
-  })}</p>
-  <p>${logThrust({
-    key: '........thrust',
-    value: clientState.gameState?.fwdThrst || 0,
-    negChar: '-',
-    posChar: '+',
-  })}</p>
-  <p>${logThrust({
-    key: '...turn thrust',
-    value: clientState.gameState?.trnThrst || 0,
-  })}</p>
-  <p>......pixi app | ${Intl.NumberFormat('en-GB').format(
+  const text = `
+.....connected | ${clientState.connected}
+${logMeter({
+  key: '.......ping ms',
+  value: clientState.pingMs || 0,
+  max: 30,
+  formattedValue: `${clientState.pingMs}ms (${clientState.pingRoundtripMs}ms)`,
+})}
+${logMeter({
+  key: '........F.P.S.',
+  value: clientState.pixiState.fps,
+  max: 75,
+})}
+${logMeter({
+  key: '......delta ms',
+  value: Math.round(clientState.pixiState.deltaMs),
+  max: 20,
+})}
+${logMeter({
+  key: '...fire one ms',
+  value: clientState.gameState?.fire1 || 0,
+  max: 500,
+})}
+${logThrust({
+  key: '........thrust',
+  value: clientState.gameState?.fwdThrst || 0,
+  negChar: '-',
+  posChar: '+',
+})}
+${logThrust({
+  key: '...turn thrust',
+  value: clientState.gameState?.trnThrst || 0,
+})}
+......pixi app | ${Intl.NumberFormat('en-GB').format(
     Math.round(clientState.pixiState.timeElapsedMs)
-  )} ms</p>
-  <p>.........users | ${clientState.activeUsers
-    .map((u) => u.username)
-    .join(', ')}</p>
-  <p>${JSON.stringify(clientState.gameState?.debug || {}, null, 1)}</p>
-  ${(clientState.gameState?.actors || []).map((a, i) => {
-    return `<h3>Actor ${i + 1}</h3><p>x: ${a.position.x}, y: ${
-      a.position.y
-    }</p><p>health: ${a.health}, rotation: ${a.rotation}</p><p>scale: ${
-      a.scale
-    }, texture: ${a.frameTextureKey.toString()}</p>`;
-  })}
+  )} ms
+.........users | ${clientState.activeUsers.map((u) => u.username).join(', ')}
   `;
+
+  const dashboardDisplayText = new BitmapText(text, {
+    fontName: 'Digital-7 Mono',
+    fontSize: 15,
+    align: 'left',
+    tint: GREEN,
+  });
+
+  dashboardDisplayText.x = 25;
+  dashboardDisplayText.y = 25;
+  dashboardDisplayText.alpha = 0.75;
+  container.addChild(dashboardDisplayText);
 };

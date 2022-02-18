@@ -10,6 +10,7 @@ export const clientState: IClientState = {
     timeElapsedMs: 0,
     ticks: 0,
     bigTicks: 0,
+    sinVariant: 0,
   },
 };
 
@@ -25,6 +26,7 @@ export const updatePixiState = (delta: number, deltaMS: number) => {
   pixiState.fps = Math.round(1000 / pixiState.deltaMs);
   pixiState.timeElapsedMs += pixiState.deltaMs;
   pixiState.ticks += 1;
+  pixiState.sinVariant = (1 + Math.sin(pixiState.timeElapsedMs / 100)) * 0.5;
 
   if (pixiState.ticks > 9999) {
     pixiState.bigTicks += 1;

@@ -1,5 +1,22 @@
 const MAX_RADIANS = Math.PI * 2;
 
+const getDirectionDiff = (a: number, b: number) => {
+  const diff = Math.abs(a - b);
+  if (diff > Math.PI) {
+    return MAX_RADIANS - diff;
+  }
+  return diff;
+};
+
+export const isDirectionMatch =
+  (tolerance = 0.05) =>
+  (a?: number, b?: number) => {
+    if (typeof a !== 'number' || typeof b !== 'number') {
+      return false;
+    }
+    return getDirectionDiff(a, b) < tolerance;
+  };
+
 export function getVelocity({ speed = 0, rotation = 0 }) {
   return {
     x: Math.sin(rotation) * speed,
@@ -21,6 +38,14 @@ export function combineVelocity(vA = defaultVector, vB = defaultVector) {
     x: vA.x + vB.x,
     y: vA.y + vB.y,
   };
+}
+
+export function getDistance(
+  vActorAPosition = defaultVector,
+  vActorBPosition = defaultVector
+) {
+  const vCollision = relativeVelocity(vActorBPosition, vActorAPosition);
+  return Math.hypot(vCollision.x, vCollision.y);
 }
 
 export function getCollisionNorm(
@@ -48,14 +73,6 @@ export function getCollisionSpeed(
   );
 }
 
-export function getDistance(
-  vActorAPosition = defaultVector,
-  vActorBPosition = defaultVector
-) {
-  const vCollision = relativeVelocity(vActorBPosition, vActorAPosition);
-  return Math.hypot(vCollision.x, vCollision.y);
-}
-
 export function getDirection(
   vFromPosition = defaultVector,
   vToPosition = defaultVector
@@ -69,7 +86,6 @@ export function getVelocitySpeed(v = defaultVector) {
 }
 
 export function normalizeDirection(dir: number) {
-  const MAX_RADIANS = Math.PI * 2;
   let d = dir % MAX_RADIANS;
   while (d < 0) {
     d += MAX_RADIANS;

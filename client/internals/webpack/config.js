@@ -36,14 +36,14 @@ module.exports = (_env, argv) => {
     devtool: isDevelopment ? 'eval-cheap-module-source-map' : 'source-map',
     resolve: {
       alias: resolveAlias(srcDirPath),
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.png'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.png', 'xml'],
     },
     cache: isDevelopment,
     optimization: optimization(isDevelopment),
     devServer: devServer(port, isDevelopment),
     module: {
       rules: [
-        { test: /\.(png|jpe?g|gif)$/i, use: [{ loader: 'file-loader' }] },
+        { test: /\.(png|jpe?g|gif|xml)$/i, use: [{ loader: 'file-loader' }] },
         {
           test: /\.(ts|js)x?$/,
           exclude: '/node_modules',

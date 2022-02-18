@@ -1,6 +1,7 @@
 import { omit, path, pathOr, prop, propEq, propOr, range } from 'ramda';
 import { v4 as generateUid } from 'uuid';
-import { ETextureKey, IVector } from '../../../shared/types';
+import { crafts } from '../../../shared/specs/craft';
+import { ETextureKey, IBullet, IVector } from '../../../shared/types';
 // import { getAsset, removeAsset, setAsset } from '../../utils/assetStore';
 // import { getFrameTextureId, getTextureId } from '../../utils/textures';
 // import { getSpecs } from '../../specs/getSpecs';
@@ -12,7 +13,9 @@ import {
   getVelocity,
   normalizeDirection,
 } from '../../../shared/utils/physics';
+import { serverState } from '../state';
 import { IActor } from '../types';
+import { getCraftSpec } from '../utils';
 // import { updateActorAi } from './ai';
 // import { assignToChunk } from './world';
 // import {
@@ -42,33 +45,59 @@ import { IActor } from '../types';
 //   };
 // };
 
+export const updateBullet = (b: IBullet): IBullet => {
+  const bullet = { ...b };
+  const { delta, deltaMs } = serverState;
+
+  bullet.velocity = applyAtmosphereToVelocity({
+    velocity: bullet.velocity,
+    atmosphere: 0.05,
+    gravity: 0,
+    factor: 0.3,
+    delta,
+  });
+
+  bullet.position = updatePosition({
+    position: bullet.position,
+    velocity: bullet.velocity,
+    delta,
+  });
+
+  bullet.life -= delta * 0.1;
+
+  return bullet;
+};
+
 interface IInitActor {
-  assetKey: string;
+  assetKey: keyof typeof crafts;
   uid?: string;
   overrides?: Partial<IActor>;
+  scale?: number;
 }
 export const initActor = ({
   assetKey,
   overrides = {},
   uid,
+  scale = 1,
 }: IInitActor): IActor => {
+  const craft = getCraftSpec(assetKey);
   // ...prop('initialData')(getSpecs(assetKey))
   return {
     uid: uid || generateUid(),
     assetKey,
+    scale,
     frameTextureKey: ETextureKey.CRAFT_DEFAULT,
     // default settings
-    scale: 1,
     rotation: 0,
     position: { ...defaultVector },
     velocity: { ...defaultVector },
     isBullet: false,
-    shield: 100,
-    // health and life?? do we need both?
-    life: 100,
-    health: 100,
-    mass: 100,
-    fuelCapacity: 100,
+    ...craft.initialData,
+    // shield: 100,
+    // life: 100,
+    // mass: 100,
+    // fuelCapacity: 100,
+    radius: craft.radius * scale,
     ...overrides,
   };
 };

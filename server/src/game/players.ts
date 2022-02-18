@@ -1,6 +1,6 @@
 import { ETextureKey, IRenderActor } from '../../../shared/types';
 import { normalizeDirection } from '../../../shared/utils/physics';
-import { IPlayerState } from '../types';
+import { EButtonStatus, IPlayerState } from '../types';
 import { pick } from 'ramda';
 import { serverState } from '../state';
 import {
@@ -8,6 +8,7 @@ import {
   applyThrusters,
   updatePosition,
 } from './actor';
+import { crafts } from '../../../shared/specs/craft';
 
 const craftTurningSpeed = 0.08;
 
@@ -18,6 +19,14 @@ export const updatePlayer = (p: IPlayerState): IPlayerState => {
   if (!userInput) {
     return player;
   }
+
+  const craftSpec = crafts[player.assetKey];
+
+  if (!craftSpec) {
+    return p;
+  }
+
+  const availableTextureKeys = craftSpec.frames.map((f) => f.key);
 
   // rotating the player
   player.frameTextureKey = ETextureKey.CRAFT_DEFAULT;
@@ -32,6 +41,11 @@ export const updatePlayer = (p: IPlayerState): IPlayerState => {
       userInput.turnThruster < 0
         ? ETextureKey.CRAFT_LEFT
         : ETextureKey.CRAFT_RIGHT;
+  }
+
+  // this defaults textureKey if not available for craft
+  if (!availableTextureKeys.includes(player.frameTextureKey)) {
+    player.frameTextureKey = availableTextureKeys[0];
   }
 
   player.velocity = applyAtmosphereToVelocity({
@@ -70,9 +84,13 @@ export const playerToRender = (player: IPlayerState): IRenderActor => {
     'position',
     'assetKey',
     'frameTextureKey',
-    'health',
+    'life',
     'rotation',
     'scale',
+    'isYou',
+    'shots',
+    'hits',
+    'kills',
   ];
   return pick(renderActorKeys, player);
 };

@@ -7,16 +7,21 @@ const apiUrl = location.protocol + '//' + location.hostname + ':' + 3009;
 
 export const connectToServer = (): Promise<TSocket> =>
   new Promise((resolve, reject) => {
+    console.log('connecting to server...' + apiUrl);
+
     const socket: TSocket = io(apiUrl);
 
     clientState.socket = socket;
 
     socket.on('connect', () => {
+      console.log('connected to server!');
       clientState.connected = true;
+
       resolve(socket);
     });
 
     socket.on('connect_error', (e) => {
+      console.log('connect error');
       clientState.connected = false;
       reject(e);
     });
@@ -40,7 +45,7 @@ export const connectToServer = (): Promise<TSocket> =>
       clientState.gameState = d;
     });
 
-    socket.emit('joinGame');
+    // socket.emit('joinGame');
   });
 
 export const startPinging = (socket: TSocket) => {

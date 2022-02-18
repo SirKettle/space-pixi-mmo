@@ -1,8 +1,10 @@
 import * as T from '../../../shared/types';
 import { TSocket } from '~types';
+import { spaceDumper } from '../../../shared/specs/craft';
 
 export const subscribeToInputEvents = (socket: TSocket) => {
   const joinBtn = document.getElementById('joinBtn');
+  const join2Btn = document.getElementById('join2Btn');
   const leaveBtn = document.getElementById('leaveBtn');
 
   function handleKey(e: KeyboardEvent, inputAction: 'keyDown' | 'keyUp') {
@@ -62,7 +64,10 @@ export const subscribeToInputEvents = (socket: TSocket) => {
   });
 
   joinBtn?.addEventListener('click', () => {
-    socket.emit('joinGame');
+    socket.emit('joinGame', 'spacecraft');
+  });
+  join2Btn?.addEventListener('click', () => {
+    socket.emit('joinGame', 'spaceDumper');
   });
   leaveBtn?.addEventListener('click', () => {
     socket.emit('leaveGame');

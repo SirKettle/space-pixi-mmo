@@ -1,3 +1,5 @@
+import { crafts } from './specs/craft';
+
 // BASIC TYPES and SHAPES
 export interface IVector {
   x: number;
@@ -9,6 +11,12 @@ export interface IRect {
   y: number;
   width: number;
   height: number;
+}
+
+export interface ICircle {
+  x: number;
+  y: number;
+  radius: number;
 }
 
 export enum EInputAction {
@@ -33,11 +41,30 @@ export interface IUser {
 
 export interface IRenderActor {
   position: IVector;
-  assetKey: string;
+  assetKey: keyof typeof crafts;
   frameTextureKey: ETextureKey;
-  health: number; // percentage
+  life: number; // percentage
   rotation: number; // radian value
   scale?: number; // percentage - default to 1
+  isYou?: boolean;
+  kills?: number;
+  hits?: number;
+  shots?: number;
+  deaths?: number;
+}
+
+export interface IBullet {
+  isBullet: true;
+  position: IVector;
+  velocity: IVector;
+  radius: number;
+  firedBy: string; // client id
+  // assetKey: keyof typeof bullets;
+  // frameTextureKey: ETextureKey;
+  life: number; // percentage
+  rotation: number; // radian value
+  power: number;
+  mass: number;
 }
 
 export interface IDebugInfo {
@@ -49,6 +76,12 @@ export interface IDebugInfo {
 export interface IGameRenderUpdate {
   cameraOffset: IVector;
   actors: IRenderActor[];
+  nearestTarget?: {
+    direction: number;
+    distance: number;
+    position: IVector;
+  };
+  bullets: IBullet[];
   fwdThrst?: number;
   trnThrst?: number;
   fire1?: number;
@@ -67,7 +100,7 @@ export interface IClientToServerEvents {
   keyDown: (action: EInputAction) => void;
   keyUp: (action: EInputAction) => void;
   toggleDebug: () => void;
-  joinGame: () => void;
+  joinGame: (craftKey: keyof typeof crafts) => void;
   leaveGame: () => void;
   pauseGame: () => void;
 }

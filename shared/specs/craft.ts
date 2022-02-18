@@ -29,6 +29,7 @@ export interface ICraftSpec {
     mass: number;
     fuelCapacity: number;
   };
+  radius: number;
   imageUrl: string;
   frames: IFrameConfig[];
 }
@@ -53,6 +54,7 @@ export const spacecraft: ICraftSpec = {
     mass: 100,
     fuelCapacity: 100,
   },
+  radius: 16,
   imageUrl: '',
   frames: [
     // { key: 'hardLeft', rect: getHorizontalFrameRect(0, 32, 32) },
@@ -66,6 +68,37 @@ export const spacecraft: ICraftSpec = {
   ],
 };
 
+export const spaceDumper: ICraftSpec = {
+  thrust: {
+    forward: 0.2,
+    reverse: 0.1,
+    side: 0.05,
+    turn: 0.5,
+  },
+  hitArea: {
+    basic: {
+      x: 0.5,
+      y: 0.5,
+      radius: 0.5,
+    },
+  },
+  initialData: {
+    shield: 1,
+    life: 300,
+    mass: 300,
+    fuelCapacity: 300,
+  },
+  radius: 44,
+  imageUrl: '',
+  frames: [
+    {
+      key: ETextureKey.CRAFT_DEFAULT /* straight */,
+      rect: getHorizontalFrameRect(0, 100, 84),
+    },
+  ],
+};
+
 export const crafts = {
   spacecraft,
+  spaceDumper,
 };
