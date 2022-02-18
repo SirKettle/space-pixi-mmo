@@ -6,7 +6,7 @@ import {
   TClient,
 } from '../types';
 import { serverState } from '../state';
-import { getVelocity } from '../../../shared/utils/physics';
+import { combineVelocity, getVelocity } from '../../../shared/utils/physics';
 
 const defaultButtonState: IButtonState = {
   downMs: 0,
@@ -128,16 +128,16 @@ export const updateUserInput = () => {
         player.shots = (player.shots || 0) + 1;
         const firePower =
           Math.min(1, clientUserInput.fire1.downMs / 500) * 0.8 + 0.2;
-        const speed = 10 + firePower * 10;
+        const speed = 20 + firePower * 20;
         const velocity = getVelocity({ speed, rotation: player.rotation });
         serverState.gameState.bullets.push({
           isBullet: true,
           position: { ...player.position },
-          velocity,
+          velocity: combineVelocity(player.velocity, velocity),
           rotation: 0,
           firedBy: player.clientId,
-          life: 2 + firePower * 2,
-          power: firePower * 50,
+          life: 2 + firePower * 10,
+          power: firePower * 150,
           mass: firePower * 5,
           radius: 10 * (0.25 + firePower * 0.75),
         });

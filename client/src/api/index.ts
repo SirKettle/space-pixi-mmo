@@ -51,5 +51,5 @@ export const startPinging = (socket: TSocket) => {
   socket.emit('pingTest', Date.now());
   setInterval(() => {
     socket.emit('pingTest', Date.now());
-  }, 60000);
+  }, 5000);
 };
