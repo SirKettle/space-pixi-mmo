@@ -15,15 +15,7 @@ import { getCraftSpec } from '~utils/spritesheet';
 import { starsParallax } from '~utils/parallax';
 import { defaultVector } from '../../../shared/utils/physics';
 import { drawCircle } from '~utils/graphics';
-import {
-  BLUE,
-  BLUE2,
-  GREEN,
-  GREENY_BLUE,
-  RED,
-  YELLOW,
-} from '../../../shared/constants/color';
-import { healthColor } from '~utils/colors';
+import { GREENY_BLUE } from '../../../shared/constants/color';
 import { crafts } from '../../../shared/specs/craft';
 import { updateDash } from './dash';
 import { IVector } from '../../../shared/types';
@@ -31,11 +23,9 @@ import { IVector } from '../../../shared/types';
 const loader = Loader.shared;
 
 const loadAssets = async () => {
-  console.log('load fonts and other assets');
   loader.add('fontDisplay', fontDashDisplay);
   return new Promise((resolve) => {
     loader.load(() => {
-      console.log('fonts and other assets loaded!');
       resolve(void 0);
     });
   });
@@ -59,10 +49,6 @@ const loadCraftTextures = async (c: typeof crafts) => {
   ) as Record<keyof typeof crafts, BaseTexture>;
 };
 
-//   baseTextureInfo.texture, new Rectangle(x, y, width, height)ture = PIXI.Texture.from('assets/image.png');
-// let sprite1 = new PIXI.Sprite(texture);
-// let sprite2 = new PIXI.Sprite(texture);
-
 let app: Application;
 
 export const preInitGame = () => {
@@ -70,11 +56,9 @@ export const preInitGame = () => {
   if (!gameEl) {
     return;
   }
-  console.log('gameEl found');
 
   const gameWrapperEl = document.getElementById('gameWrapper');
   if (gameWrapperEl) {
-    console.log('gameWrapperEl found');
     gameWrapperEl.style.aspectRatio = `${settings.chunkRatio[0]} / ${settings.chunkRatio[1]}`;
   }
 
@@ -89,19 +73,11 @@ export const preInitGame = () => {
 
 export async function initGame() {
   if (!app) {
-    console.log('no app found');
     return;
   }
-  // if (!clientState.craftKey) {
-  //   console.log('no craft key selected');
-  //   return;
-  // }
 
   await loadAssets();
   const craftTextures = await loadCraftTextures(crafts);
-
-  // const [craftTexture] = await loadAssets([craftSpec.imageUrl]);
-  console.log('assets loaded');
 
   const base = new Container();
   const background = new Container();
@@ -115,8 +91,6 @@ export async function initGame() {
   app.stage.addChild(dash);
   app.stage.addChild(foreground);
   app.stage.addChild(debug);
-
-  // const spaceBgImage = '../static/assets/images/tiles/space_bg.png';
 
   const parallax = starsParallax.map((config) => {
     const sprite = TilingSprite.from(config.url, {
@@ -140,13 +114,6 @@ export async function initGame() {
       background.addChild(p.sprite);
     }
   });
-
-  // const baseBackground = TilingSprite.from(spaceBgImage, {
-  //   width: app.screen.width,
-  //   height: app.screen.height,
-  // });
-
-  // base.addChild(baseBackground);
 
   function mainLoop(delta: number) {
     updatePixiState(delta, app.ticker.elapsedMS);
@@ -175,9 +142,6 @@ export async function initGame() {
     if (clientState.gameState?.actors.length) {
       clientState.gameState?.actors.forEach((a) => {
         const isPlayer = a.isYou || false;
-        // const sprite = new Sprite('/static/ase');
-
-        // a.assetKey
 
         const craftSpec = getCraftSpec(a.assetKey);
 
@@ -207,8 +171,6 @@ export async function initGame() {
             isPlayer,
           });
 
-          // TODO;nearestPlayer
-
           // const hitCircle = drawCircle({
           //   x,
           //   y,
@@ -233,28 +195,12 @@ export async function initGame() {
           fillAlpha: Math.min(1, b.life),
           radius: b.radius,
           lineWidth: 0,
-          // lineColor: BLUE,
-          // lineAlpha: 0.8,
         });
 
         world.addChild(bullet);
       });
     }
-
-    // craftSpec.frames.forEach((f, i) => {
-    //   const t = new Texture(
-    //     craftTexture,
-    //     new Rectangle(f.rect.x, f.rect.y, f.rect.width, f.rect.height)
-    //   );
-    //   const sprite = new Sprite(t);
-    //   sprite.position.set(100 + i * 100, 100 + i * 50);
-    //   sprite.anchor.set(0.5);
-    //   sprite.scale.set(1);
-    //   sprite.rotation = 0;
-    //   app.stage.addChild(sprite);
-    // });
   }
 
   app.ticker.add(mainLoop);
-  // mainLoop(1);
 }

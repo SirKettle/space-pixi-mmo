@@ -1,5 +1,4 @@
 import { io } from 'socket.io-client';
-import * as T from '../../../shared/types';
 import { TSocket } from '~types';
 import { clientState } from '~state';
 

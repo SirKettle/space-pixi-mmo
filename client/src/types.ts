@@ -27,5 +27,4 @@ export interface IClientState {
   pingRoundtripMs?: number;
   gameState?: T.IGameRenderUpdate;
   pixiState: IPixiAppState;
-  craftKey?: keyof typeof crafts;
 }

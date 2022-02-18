@@ -76,7 +76,6 @@ export const updateDash = ({
   if (isPlayer) {
     const fireButtonPressedTime = clientState.gameState?.fire1 || 0;
 
-    // const firePower = Math.max(0, Math.min(1, fire1 / 500));
     const firePower = Math.min(1, fireButtonPressedTime / 500) * 0.8 + 0.2;
 
     // Firepower circle
@@ -111,9 +110,6 @@ export const updateDash = ({
       isNearestTargetInSights &&
       isDirectionMatch(0.075)(actor.rotation, nearestTargetDirection);
 
-    // dashLog('player rotation..', actor.rotation);
-    // dashLog('nearest target...', nearestTargetDirection || '?');
-
     const targets: Graphics[] = [];
     targets.push(
       drawCircle({
@@ -126,10 +122,9 @@ export const updateDash = ({
           : 0.05,
         x,
         y,
-        radius: targetRadius, // - sinVariant,
+        radius: targetRadius,
       })
     );
-    //
 
     const compassGraphics = [
       0,

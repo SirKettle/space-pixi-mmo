@@ -27,8 +27,6 @@ export const getFrameRects = ({
   }, [])(times(identity)(rows));
 };
 
-// import imgUrl from '../static/assets/images/craft_spritesheet.png';
-
 const getCraftImageUrl = (craftKey: keyof typeof crafts): string => {
   return {
     spacecraft: '../static/assets/images/sprites/craft_spritesheet.png',
@@ -36,7 +34,6 @@ const getCraftImageUrl = (craftKey: keyof typeof crafts): string => {
   }[craftKey];
 };
 
-// console.log(imgUrl);
 export const getCraftSpec = (craftKey: keyof typeof crafts): ICraftSpec => {
   return {
     ...crafts[craftKey],

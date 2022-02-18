@@ -23,7 +23,6 @@ const defaultUserInputState = (): IUserInputState => ({
 
 export const handleKeyDown = (socket: TClient) => (action: T.EInputAction) => {
   if (!serverState.userInput[socket.id]) {
-    console.log('keyDown init user input');
     serverState.userInput[socket.id] = defaultUserInputState();
   }
 
@@ -142,7 +141,6 @@ export const updateUserInput = () => {
           mass: firePower * 5,
           radius: 10 * (0.25 + firePower * 0.75),
         });
-        console.log('FIRE', clientUserInput.fire1.downMs, speed);
       }
       clientUserInput.fire1 = { ...defaultButtonState };
     }
