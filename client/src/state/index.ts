@@ -12,6 +12,10 @@ export const clientState: IClientState = {
     bigTicks: 0,
     sinVariant: 0,
   },
+  gameEffects: {
+    explosions: [],
+    sfx: [],
+  },
 };
 
 export const settings: ISettings = {

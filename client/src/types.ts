@@ -27,4 +27,8 @@ export interface IClientState {
   pingRoundtripMs?: number;
   gameState?: T.IGameRenderUpdate;
   pixiState: IPixiAppState;
+  gameEffects: {
+    explosions: T.IPositionScale[];
+    sfx: T.ISfx[];
+  };
 }

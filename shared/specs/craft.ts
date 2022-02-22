@@ -37,9 +37,9 @@ export interface ICraftSpec {
 export const spacecraft: ICraftSpec = {
   thrust: {
     forward: 0.2,
-    reverse: 0.1,
+    reverse: 0.15,
     side: 0.05,
-    turn: 0.5,
+    turn: 0.1,
   },
   hitArea: {
     basic: {
@@ -70,10 +70,10 @@ export const spacecraft: ICraftSpec = {
 
 export const spaceDumper: ICraftSpec = {
   thrust: {
-    forward: 0.2,
-    reverse: 0.1,
-    side: 0.05,
-    turn: 0.5,
+    forward: 0.15,
+    reverse: 0.05, // not used?
+    side: 0.025,
+    turn: 0.05,
   },
   hitArea: {
     basic: {
@@ -84,7 +84,7 @@ export const spaceDumper: ICraftSpec = {
   },
   initialData: {
     shield: 1,
-    life: 300,
+    life: 400,
     mass: 300,
     fuelCapacity: 300,
   },

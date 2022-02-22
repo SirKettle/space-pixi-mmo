@@ -58,8 +58,17 @@ export const updateDash = ({
 
   world.addChild(healthCircle);
 
+  const percentage = (num: number) => Math.round(num * 100);
+
+  const hitPercentage =
+    typeof actor.shots === 'number' && actor.shots > 1
+      ? (actor.hits || 0) / actor.shots
+      : undefined;
+
   const dashboardDisplayText = new BitmapText(
-    `${actor.hits || 0}/${actor.shots || 0} - ${actor.kills || 0} Kills`,
+    `${hitPercentage ? percentage(hitPercentage) : 0}% - ${
+      actor.kills || 0
+    } Kills`,
     {
       fontName: 'Digital-7 Mono',
       fontSize: 20,

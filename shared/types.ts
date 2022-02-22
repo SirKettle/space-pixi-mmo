@@ -53,15 +53,28 @@ export interface IRenderActor {
   deaths?: number;
 }
 
-export interface IBullet {
-  isBullet: true;
+export interface IPositionScale {
   position: IVector;
-  velocity: IVector;
+  scale: number;
+}
+
+export interface ISfx {
+  key: string;
+  vol: number;
+}
+
+export interface IRenderBullet {
+  position: IVector;
   radius: number;
+  life: number; // percentage
+}
+
+export interface IBullet extends IRenderBullet {
+  isBullet: true;
+  velocity: IVector;
   firedBy: string; // client id
   // assetKey: keyof typeof bullets;
   // frameTextureKey: ETextureKey;
-  life: number; // percentage
   rotation: number; // radian value
   power: number;
   mass: number;
@@ -81,7 +94,9 @@ export interface IGameRenderUpdate {
     distance: number;
     position: IVector;
   };
-  bullets: IBullet[];
+  bullets: IRenderBullet[];
+  explosions: IPositionScale[];
+  sfx: ISfx[];
   fwdThrst?: number;
   trnThrst?: number;
   fire1?: number;

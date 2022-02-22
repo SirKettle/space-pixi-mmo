@@ -1,8 +1,11 @@
 import { pick } from 'ramda';
 import { IBullet, ICircle } from '../../../shared/types';
 import {
+  combineVelocity,
   getCollisionNorm,
   getCollisionSpeed,
+  getDirection,
+  getVelocity,
   relativeVelocity,
 } from '../../../shared/utils/physics';
 import { serverState } from '../state';
@@ -69,8 +72,32 @@ export const handleCollision = (
   a2.velocity.x += impulse * a1.mass * vCollisionNorm.x;
   a2.velocity.y += impulse * a1.mass * vCollisionNorm.y;
 
-  a1.life -= getActorDamage(a2, collisionSpeed);
-  a2.life -= getActorDamage(a1, collisionSpeed);
+  const actorADamage = getActorDamage(a1, collisionSpeed);
+  const actorBDamage = getActorDamage(a2, collisionSpeed);
+
+  a1.life -= actorBDamage;
+  a2.life -= actorADamage;
+
+  // add explosions and sound fx
+
+  const direction = getDirection(a1.position, a2.position);
+  const startVelocity = getVelocity({ speed: a1.radius, rotation: direction });
+  const collisionPosition = combineVelocity(startVelocity, a1.position);
+
+  const isOneActorBullet = a1.isBullet || a2.isBullet;
+
+  const damageTotal = isOneActorBullet
+    ? a1.isBullet
+      ? actorADamage
+      : actorBDamage
+    : actorADamage + actorBDamage;
+
+  const damageVol = damageTotal / 100;
+
+  serverState.gameState.explosions.push({
+    scale: damageVol,
+    position: collisionPosition,
+  });
 
   return true;
 };

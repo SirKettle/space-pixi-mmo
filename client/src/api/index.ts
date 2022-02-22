@@ -42,6 +42,19 @@ export const connectToServer = (): Promise<TSocket> =>
 
     socket.on('update', (d) => {
       clientState.gameState = d;
+
+      // add effects to gameEffects (because out of sync server/client loops)
+      // This is because gameState can be reset before
+      // effects have been played
+      clientState.gameEffects.explosions = [
+        ...clientState.gameEffects.explosions,
+        ...(d.explosions || []),
+      ];
+
+      clientState.gameEffects.sfx = [
+        ...clientState.gameEffects.sfx,
+        ...(d.sfx || []),
+      ];
     });
 
     // socket.emit('joinGame');

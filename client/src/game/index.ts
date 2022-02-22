@@ -19,6 +19,8 @@ import { GREENY_BLUE } from '../../../shared/constants/color';
 import { crafts } from '../../../shared/specs/craft';
 import { updateDash } from './dash';
 import { IVector } from '../../../shared/types';
+import { addExplosion, loadParticleAssets } from '~utils/particle';
+import { play } from '~utils/audio';
 
 const loader = Loader.shared;
 
@@ -78,6 +80,7 @@ export async function initGame() {
 
   await loadAssets();
   const craftTextures = await loadCraftTextures(crafts);
+  await loadParticleAssets(loader);
 
   const base = new Container();
   const background = new Container();
@@ -199,6 +202,21 @@ export async function initGame() {
 
         world.addChild(bullet);
       });
+    }
+
+    if (clientState.gameEffects.explosions.length) {
+      clientState.gameEffects.explosions.forEach((explosion) => {
+        addExplosion({
+          container: foreground,
+          scale: explosion.scale || 1,
+          x: explosion.position.x + screenCameraOffset.x,
+          y: explosion.position.y + screenCameraOffset.y,
+        });
+
+        play(explosion.scale > 1 ? 'bigLaser' : 'laser', explosion.scale);
+      });
+
+      clientState.gameEffects.explosions = [];
     }
   }
 

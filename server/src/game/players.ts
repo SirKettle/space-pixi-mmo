@@ -1,4 +1,9 @@
-import { ETextureKey, IRenderActor } from '../../../shared/types';
+import {
+  ETextureKey,
+  IBullet,
+  IRenderActor,
+  IRenderBullet,
+} from '../../../shared/types';
 import { normalizeDirection } from '../../../shared/utils/physics';
 import { EButtonStatus, IPlayerState } from '../types';
 import { pick } from 'ramda';
@@ -9,8 +14,6 @@ import {
   updatePosition,
 } from './actor';
 import { crafts } from '../../../shared/specs/craft';
-
-const craftTurningSpeed = 0.08;
 
 export const updatePlayer = (p: IPlayerState): IPlayerState => {
   const player = { ...p };
@@ -34,7 +37,7 @@ export const updatePlayer = (p: IPlayerState): IPlayerState => {
   if (userInput.turnThruster !== 0) {
     // todo: use pixi one logic
     player.rotation = normalizeDirection(
-      player.rotation + userInput.turnThruster * delta * craftTurningSpeed
+      player.rotation + userInput.turnThruster * delta * craftSpec.thrust.turn
     );
 
     player.frameTextureKey =
@@ -60,8 +63,14 @@ export const updatePlayer = (p: IPlayerState): IPlayerState => {
   player.velocity = applyThrusters({
     rotation: player.rotation,
     velocity: player.velocity,
+    // TODO: use spec to apply config thrusters
     forwardThrust: userInput.forwardThruster,
+    forwardThrustEngineOutput:
+      userInput.forwardThruster > 0
+        ? craftSpec.thrust.forward
+        : craftSpec.thrust.reverse,
     sideThrust: userInput.strafeThruster,
+    sideThrustEngineOutput: craftSpec.thrust.side,
     delta,
   });
 
@@ -93,4 +102,9 @@ export const playerToRender = (player: IPlayerState): IRenderActor => {
     'kills',
   ];
   return pick(renderActorKeys, player);
+};
+
+export const bulletToRender = (bullet: IBullet): IRenderBullet => {
+  const renderKeys = ['position', 'radius', 'life'];
+  return pick(renderKeys, bullet);
 };

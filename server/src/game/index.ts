@@ -1,19 +1,14 @@
 import { serverState } from '../state';
 import { updateUserInput } from '../client/input';
-import { playerToRender, updateAllPlayers } from './players';
+import { bulletToRender, playerToRender, updateAllPlayers } from './players';
 import {
-  ETextureKey,
-  IBullet,
+  IPositionScale,
   IRenderActor,
+  IRenderBullet,
   IVector,
 } from '../../../shared/types';
-import { getRandomInt } from '../../../shared/utils/random';
-import {
-  defaultVector,
-  getDirection,
-  getDistance,
-} from '../../../shared/utils/physics';
-import { initActor, updateBullet } from './actor';
+import { getDirection, getDistance } from '../../../shared/utils/physics';
+import { updateBullet } from './actor';
 import { handleCollisions } from './collision';
 
 export function gameLoop() {
@@ -23,6 +18,11 @@ export function gameLoop() {
   serverState.prevUpdateTime = prevUpdateTime;
   serverState.delta = delta;
   serverState.deltaMs = deltaMs;
+
+  // reset momentary state
+  if (serverState.gameState.explosions.length) {
+    serverState.gameState.explosions = [];
+  }
 
   // update input controls,
   updateUserInput();
@@ -74,7 +74,8 @@ export function gameLoop() {
         const cameraOffset = { ...player.position }; // todo make this like above (following player)
 
         const shouldRender =
-          (camOffset: IVector) => (obj: IBullet | IRenderActor) =>
+          (camOffset: IVector) =>
+          (obj: IRenderBullet | IRenderActor | IPositionScale) =>
             getDistance(camOffset, obj.position) < 700;
 
         const otherPlayers = players
@@ -98,12 +99,16 @@ export function gameLoop() {
           actors: players
             .map(playerToRender)
             .filter(shouldRender(cameraOffset)), // will want to filter this to only in view later on
-          bullets: serverState.gameState.bullets.filter(
-            shouldRender(cameraOffset)
-          ), // will want to filter this to only in view later on
+          bullets: serverState.gameState.bullets
+            .map(bulletToRender)
+            .filter(shouldRender(cameraOffset)), // will want to filter this to only in view later on
           fire1: clientUserInput?.fire1.downMs || 0,
           fwdThrst: clientUserInput?.forwardThruster || 0,
           trnThrst: clientUserInput?.turnThruster || 0,
+          explosions: serverState.gameState.explosions.filter(
+            shouldRender(cameraOffset)
+          ),
+          sfx: [],
           nearestTarget: nearestPlayer
             ? {
                 distance: nearestPlayer.distanceFromPlayer,

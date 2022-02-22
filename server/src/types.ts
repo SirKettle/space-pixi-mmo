@@ -42,6 +42,7 @@ export interface IServerGameState {
   players: IPlayerState[];
   actors: T.IRenderActor[];
   bullets: T.IBullet[];
+  explosions: T.IPositionScale[];
 }
 
 // Memory storage for (temporary) data persistence
