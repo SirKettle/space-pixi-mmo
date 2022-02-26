@@ -8,9 +8,11 @@ import {
   getVelocity,
   relativeVelocity,
 } from '../../../shared/utils/physics';
+import { getRandomInt } from '../../../shared/utils/random';
 import { serverState } from '../state';
-import { IActor } from '../types';
+import { IActor, IPlayerState } from '../types';
 import { getCraftSpec } from '../utils';
+import { randomActorState } from './actor';
 
 export const getActorCircle = (a: IActor | IBullet): ICircle => {
   // const spec = getCraftSpec(a.assetKey);
@@ -38,6 +40,9 @@ export const isCollision = (
 ): boolean => {
   // do very basic detection for now using basic hit circle from spec
   // TODO - precision if spec has them etc
+  if (a1.life <= 0 || a2.life <= 0) {
+    return false;
+  }
   return circleIntersect(getActorCircle(a1), getActorCircle(a2));
 };
 
@@ -99,7 +104,49 @@ export const handleCollision = (
     position: collisionPosition,
   });
 
+  serverState.gameState.sfx.push({
+    position: collisionPosition,
+    vol: damageVol,
+    key: damageVol > 1 ? 'bigLaserHit' : 'explosion',
+  });
+
   return true;
+};
+
+export const handleHit = (actor: IPlayerState, hitBy: IPlayerState) => {
+  hitBy.hits = (hitBy.hits || 0) + 1;
+  hitBy.points += 10;
+  actor.points -= 5;
+
+  if (actor.life <= 0) {
+    actor.deaths = (actor.deaths || 0) + 1;
+    actor.points -= 25;
+
+    serverState.gameState.explosions.push({
+      scale: 3,
+      position: actor.position,
+    });
+    hitBy.kills = (hitBy.kills || 0) + 1;
+    hitBy.points += 50;
+
+    setTimeout(() => {
+      let a = serverState.gameState.players.find((a) => a.uid === actor.uid);
+      if (a) {
+        console.log('respawn');
+        const spec = getCraftSpec(a.assetKey);
+        a.life = spec.initialData.life;
+        a.position = {
+          x: getRandomInt(-2000, 2000),
+          y: getRandomInt(-1500, 1500),
+        };
+
+        a = {
+          ...a,
+          ...randomActorState(),
+        };
+      }
+    }, 3000);
+  }
 };
 
 export const handleCollisions = () => {
@@ -115,10 +162,7 @@ export const handleCollisions = () => {
               (p) => p.clientId === bullet.firedBy
             );
             if (firedByPlayer) {
-              firedByPlayer.hits = (firedByPlayer.hits || 0) + 1;
-              if (actorA.life <= 0) {
-                firedByPlayer.kills = (firedByPlayer.kills || 0) + 1;
-              }
+              handleHit(actorA, firedByPlayer);
             }
           }
         }
@@ -128,6 +172,13 @@ export const handleCollisions = () => {
         const actorB = serverState.gameState.players[j];
         if (isCollision(actorA, actorB)) {
           handleCollision(actorA, actorB);
+
+          if (actorA.life <= 0) {
+            handleHit(actorA, actorB);
+          }
+          if (actorB.life <= 0) {
+            handleHit(actorB, actorA);
+          }
         }
       }
     }

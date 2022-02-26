@@ -1,4 +1,4 @@
-import { omit, path, pathOr, prop, propEq, propOr, range } from 'ramda';
+import { omit, path, pathOr, pick, prop, propEq, propOr, range } from 'ramda';
 import { v4 as generateUid } from 'uuid';
 import { crafts } from '../../../shared/specs/craft';
 import { ETextureKey, IBullet, IVector } from '../../../shared/types';
@@ -13,6 +13,7 @@ import {
   getVelocity,
   normalizeDirection,
 } from '../../../shared/utils/physics';
+import { getRandomInt } from '../../../shared/utils/random';
 import { serverState } from '../state';
 import { IActor } from '../types';
 import { getCraftSpec } from '../utils';
@@ -68,6 +69,18 @@ export const updateBullet = (b: IBullet): IBullet => {
   return bullet;
 };
 
+export const randomActorState = (): Partial<IActor> => ({
+  position: {
+    x: getRandomInt(-5000, 5000),
+    y: getRandomInt(-4500, 4500),
+  },
+  rotation: normalizeDirection(Math.random() * Math.PI * 2),
+  velocity: {
+    x: Math.random() * 6 - 3,
+    y: Math.random() * 6 - 3,
+  },
+});
+
 interface IInitActor {
   assetKey: keyof typeof crafts;
   uid?: string;
@@ -98,6 +111,7 @@ export const initActor = ({
     // mass: 100,
     // fuelCapacity: 100,
     radius: craft.radius * scale,
+    points: 0,
     ...overrides,
   };
 };

@@ -29,6 +29,7 @@ export interface IClientState {
   pixiState: IPixiAppState;
   gameEffects: {
     explosions: T.IPositionScale[];
-    sfx: T.ISfx[];
+    sfx: T.IRenderSfx[];
   };
+  leaderboard: T.ILeaderboardPosition[];
 }

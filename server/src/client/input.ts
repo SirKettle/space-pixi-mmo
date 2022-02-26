@@ -124,7 +124,7 @@ export const updateUserInput = () => {
       const player = serverState.gameState.players.find(
         (p) => p.clientId === clientId
       );
-      if (player) {
+      if (player && player.life > 0) {
         player.shots = (player.shots || 0) + 1;
         const firePower =
           Math.min(1, clientUserInput.fire1.downMs / 500) * 0.8 + 0.2;
@@ -140,6 +140,11 @@ export const updateUserInput = () => {
           power: firePower * 150,
           mass: firePower * 5,
           radius: 10 * (0.25 + firePower * 0.75),
+        });
+        serverState.gameState.sfx.push({
+          position: { ...player.position },
+          vol: firePower,
+          key: firePower > 0.8 ? 'bigLaser' : 'laser',
         });
       }
       clientUserInput.fire1 = { ...defaultButtonState };

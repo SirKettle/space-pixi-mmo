@@ -1,6 +1,7 @@
 import { Container } from '@pixi/display';
 import { Graphics } from '@pixi/graphics';
-import { BitmapText } from 'pixi.js';
+import { Application, BitmapText } from 'pixi.js';
+import { renderCurvedText } from '~components/curvedText';
 import { clientState } from '~state';
 import { healthColor } from '~utils/colors';
 import {
@@ -18,7 +19,10 @@ import {
 } from '../../../shared/constants/color';
 import { ICraftSpec } from '../../../shared/specs/craft';
 import { IRenderActor, IVector } from '../../../shared/types';
-import { isDirectionMatch } from '../../../shared/utils/physics';
+import {
+  isDirectionMatch,
+  normalizeDirection,
+} from '../../../shared/utils/physics';
 
 interface IUpdateDash {
   world: Container;
@@ -58,29 +62,45 @@ export const updateDash = ({
 
   world.addChild(healthCircle);
 
-  const percentage = (num: number) => Math.round(num * 100);
+  // const percentage = (num: number) => Math.round(num * 100);
 
-  const hitPercentage =
-    typeof actor.shots === 'number' && actor.shots > 1
-      ? (actor.hits || 0) / actor.shots
-      : undefined;
+  // const hitPercentage =
+  //   typeof actor.shots === 'number' && actor.shots > 1
+  //     ? (actor.hits || 0) / actor.shots
+  //     : undefined;
 
-  const dashboardDisplayText = new BitmapText(
-    `${hitPercentage ? percentage(hitPercentage) : 0}% - ${
-      actor.kills || 0
-    } Kills`,
-    {
-      fontName: 'Digital-7 Mono',
-      fontSize: 20,
-      align: 'left',
-      tint: BLUE,
-    }
-  );
+  //   const dashboardDisplayText = new BitmapText(
+  //     `${hitPercentage ? percentage(hitPercentage) : 0}%
+  // ${actor.kills || 0} K
+  // ${actor.deaths || 0} D`,
+  //     {
+  //       fontName: 'Digital-7 Mono',
+  //       fontSize: 20,
+  //       align: 'left',
+  //       tint: BLUE,
+  //     }
+  //   );
 
-  dashboardDisplayText.x = x - 50;
-  dashboardDisplayText.y = y + minHealthRadius + 25;
-  dashboardDisplayText.alpha = isPlayer ? 0.5 : 0.25;
-  world.addChild(dashboardDisplayText);
+  //   dashboardDisplayText.x = x - 50;
+  //   dashboardDisplayText.y = y + minHealthRadius + 25;
+  //   dashboardDisplayText.alpha = isPlayer ? 0.5 : 0.25;
+  //   world.addChild(dashboardDisplayText);
+
+  // renderCurvedText({
+  //   container: world,
+  //   position,
+  //   startRotation: normalizeDirection(
+  //     ((clientState.pixiState.timeElapsedMs % 5000) / 5000) * Math.PI * 2
+  //   ),
+  //   fontStyle: {
+  //     fontSize: 15,
+  //   },
+  //   radius: minHealthRadius + 35,
+  //   message: `${actor.points} - ${actor.kills || 0} KO - ${
+  //     actor.deaths || 0
+  //   } DE - ${hitPercentage ? percentage(hitPercentage) : 0}% AC - `,
+  //   alpha: isPlayer ? 0.4 : 0.2,
+  // });
 
   if (isPlayer) {
     const fireButtonPressedTime = clientState.gameState?.fire1 || 0;

@@ -45,6 +45,7 @@ export interface IRenderActor {
   frameTextureKey: ETextureKey;
   life: number; // percentage
   rotation: number; // radian value
+  points: number;
   scale?: number; // percentage - default to 1
   isYou?: boolean;
   kills?: number;
@@ -58,9 +59,13 @@ export interface IPositionScale {
   scale: number;
 }
 
-export interface ISfx {
+export interface IRenderSfx {
   key: string;
   vol: number;
+}
+
+export interface ISfx extends IRenderSfx {
+  position?: IVector;
 }
 
 export interface IRenderBullet {
@@ -96,11 +101,19 @@ export interface IGameRenderUpdate {
   };
   bullets: IRenderBullet[];
   explosions: IPositionScale[];
-  sfx: ISfx[];
+  sfx: IRenderSfx[];
   fwdThrst?: number;
   trnThrst?: number;
   fire1?: number;
   debug?: Record<string, any>;
+}
+
+export interface ILeaderboardPosition {
+  player: string;
+  points: number;
+  kills: number;
+  hits: number;
+  accuracy: number;
 }
 
 // API contract
@@ -132,6 +145,7 @@ export interface IServerToClientEvents {
 
   // game state update
   update: (data: IGameRenderUpdate) => void;
+  leaderboard: (data: ILeaderboardPosition[]) => void;
 
   // user connection updates
   activeUsersUpdate: (users: IUser[]) => void;

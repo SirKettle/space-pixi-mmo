@@ -16,6 +16,7 @@ export const clientState: IClientState = {
     explosions: [],
     sfx: [],
   },
+  leaderboard: [],
 };
 
 export const settings: ISettings = {

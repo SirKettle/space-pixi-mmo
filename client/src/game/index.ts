@@ -10,7 +10,7 @@ import {
 } from 'pixi.js';
 import fontDashDisplay from '../static/assets/font/digital7_mono_white.xml';
 import { clientState, settings, updatePixiState } from '~state';
-import { renderDebug } from '~debug';
+// import { renderDebug } from '~debug';
 import { getCraftSpec } from '~utils/spritesheet';
 import { starsParallax } from '~utils/parallax';
 import { defaultVector } from '../../../shared/utils/physics';
@@ -21,6 +21,7 @@ import { updateDash } from './dash';
 import { IVector } from '../../../shared/types';
 import { addExplosion, loadParticleAssets } from '~utils/particle';
 import { play } from '~utils/audio';
+import { renderLeaderboard } from '~leaderboard';
 
 const loader = Loader.shared;
 
@@ -120,7 +121,7 @@ export async function initGame() {
 
   function mainLoop(delta: number) {
     updatePixiState(delta, app.ticker.elapsedMS);
-    renderDebug(debug);
+    renderLeaderboard(debug);
 
     const cameraOffset: IVector = {
       ...defaultVector,
@@ -150,7 +151,7 @@ export async function initGame() {
 
         const f = craftSpec.frames.find((f) => f.key === a.frameTextureKey);
 
-        if (f) {
+        if (a.life > 0 && f) {
           const t = new Texture(
             craftTextures[a.assetKey],
             new Rectangle(f.rect.x, f.rect.y, f.rect.width, f.rect.height)
@@ -212,11 +213,17 @@ export async function initGame() {
           x: explosion.position.x + screenCameraOffset.x,
           y: explosion.position.y + screenCameraOffset.y,
         });
-
-        play(explosion.scale > 1 ? 'bigLaser' : 'laser', explosion.scale);
       });
 
       clientState.gameEffects.explosions = [];
+    }
+
+    if (clientState.gameEffects.sfx.length) {
+      clientState.gameEffects.sfx.forEach((sfx) => {
+        play(sfx.key, sfx.vol);
+      });
+
+      clientState.gameEffects.sfx = [];
     }
   }
 

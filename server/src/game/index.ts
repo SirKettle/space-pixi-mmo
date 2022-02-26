@@ -1,15 +1,10 @@
 import { serverState } from '../state';
 import { updateUserInput } from '../client/input';
-import { bulletToRender, playerToRender, updateAllPlayers } from './players';
-import {
-  IPositionScale,
-  IRenderActor,
-  IRenderBullet,
-  IVector,
-} from '../../../shared/types';
+import { playerToRender, updateAllPlayers } from './players';
 import { getDirection, getDistance } from '../../../shared/utils/physics';
 import { updateBullet } from './actor';
 import { handleCollisions } from './collision';
+import { bulletToRender, sfxToRender, shouldRender } from './utils';
 
 export function gameLoop() {
   const prevUpdateTime = Date.now();
@@ -22,6 +17,9 @@ export function gameLoop() {
   // reset momentary state
   if (serverState.gameState.explosions.length) {
     serverState.gameState.explosions = [];
+  }
+  if (serverState.gameState.sfx.length) {
+    serverState.gameState.sfx = [];
   }
 
   // update input controls,
@@ -73,13 +71,9 @@ export function gameLoop() {
         // }
         const cameraOffset = { ...player.position }; // todo make this like above (following player)
 
-        const shouldRender =
-          (camOffset: IVector) =>
-          (obj: IRenderBullet | IRenderActor | IPositionScale) =>
-            getDistance(camOffset, obj.position) < 700;
-
         const otherPlayers = players
           .filter((p) => p.clientId !== clientId)
+          .filter((p) => p.life > 0)
           .map((p) => ({
             ...p,
             distanceFromPlayer: getDistance(player?.position, p.position),
@@ -108,7 +102,9 @@ export function gameLoop() {
           explosions: serverState.gameState.explosions.filter(
             shouldRender(cameraOffset)
           ),
-          sfx: [],
+          sfx: serverState.gameState.sfx
+            .map(sfxToRender(cameraOffset))
+            .filter((sfx) => sfx.vol > 0),
           nearestTarget: nearestPlayer
             ? {
                 distance: nearestPlayer.distanceFromPlayer,
@@ -130,5 +126,66 @@ export function gameLoop() {
   if (serverState.gameRunning) {
     // setTimeout(gameLoop, 100);
     setTimeout(gameLoop, 10);
+  }
+}
+
+const getPlayerName = (clientId: string) => {
+  return (
+    serverState.clients.find((c) => c.socket.id === clientId)?.user.username ||
+    'player rage quit'
+  );
+};
+
+export function informationLoop() {
+  if (!serverState.gamePaused) {
+    // update stuff here for all clients
+    updateAllPlayers();
+
+    serverState.gameState.bullets = serverState.gameState.bullets
+      .map(updateBullet)
+      .filter((b) => b.life > 0);
+
+    // handle collisions
+    handleCollisions();
+
+    // ai etc
+
+    // emit to clients/players
+    serverState.clients
+      .filter((c) => c.inGame)
+      .forEach((c) => {
+        // client specific code here
+        const clientId = c.socket.id;
+        const clientUserInput = serverState.userInput[clientId];
+        let player = serverState.gameState.players.find(
+          (p) => p.clientId === clientId
+        );
+
+        if (!player) {
+          // should we continue to emit to player?
+          // maybe follow the player that killed them??
+          return;
+        }
+
+        const players = serverState.gameState.players.map((p) => ({
+          ...p,
+          isYou: p.clientId === clientId ? true : undefined,
+        }));
+
+        c.socket.emit(
+          'leaderboard',
+          players.map((p) => ({
+            player: `${getPlayerName(p.clientId)}${p.isYou ? ' (YOU)' : ''}`,
+            points: p.points,
+            hits: p.hits || 0,
+            kills: p.kills || 0,
+            accuracy: (p.hits || 0) / (p.shots || 1),
+          }))
+        );
+      });
+  }
+
+  if (serverState.gameRunning) {
+    setTimeout(informationLoop, 1000);
   }
 }

@@ -1,9 +1,9 @@
 import { IClient, TClient, TIOServer } from '../types';
 import { serverState } from '../state';
-import { gameLoop } from '../game';
+import { gameLoop, informationLoop } from '../game';
 import { generateUsername } from '../utils';
 import { handleKeyDown, handleKeyUp, resetUserInput } from './input';
-import { initActor } from '../game/actor';
+import { initActor, randomActorState } from '../game/actor';
 import { getRandomInt } from '../../../shared/utils/random';
 import { normalizeDirection } from '../../../shared/utils/physics';
 import { crafts } from '../../../shared/specs/craft';
@@ -42,6 +42,7 @@ export function handleJoinGame(io: TIOServer, client: IClient) {
     if (!serverState.gameRunning) {
       serverState.gameRunning = true;
       gameLoop();
+      informationLoop();
     }
 
     if (
@@ -54,17 +55,7 @@ export function handleJoinGame(io: TIOServer, client: IClient) {
         clientId: client.socket.id,
         ...initActor({
           assetKey: craftKey,
-          overrides: {
-            position: {
-              x: getRandomInt(-300, 300),
-              y: getRandomInt(-200, 200),
-            },
-            rotation: normalizeDirection(Math.random() * Math.PI * 2),
-            velocity: {
-              x: Math.random() * 6 - 3,
-              y: Math.random() * 6 - 3,
-            },
-          },
+          overrides: randomActorState(),
         }),
       });
     }

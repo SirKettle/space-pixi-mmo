@@ -1,12 +1,9 @@
 import { Container } from '@pixi/display';
 import { BitmapText } from 'pixi.js';
 import { clientState } from '~state';
-import { BLUE, GREEN } from '../../../shared/constants/color';
-import { logMeter, logThrust } from '../../../shared/utils/log';
+import { GREEN } from '../../../shared/constants/color';
 import * as T from '../../../shared/types';
-import { times, trim } from 'ramda';
-
-// const renderPlayerScore
+import { times } from 'ramda';
 
 const strFixedLength =
   (length: number, padChar: string, padBefore?: boolean) =>
@@ -25,7 +22,7 @@ const renderLeaderboardPosition = (pos: T.ILeaderboardPosition): string => {
   return `${nameCol(pos.player)}....${numCol(pos.points)}`;
 };
 
-export const renderDebug = (container: Container) => {
+export const renderLeaderboard = (container: Container) => {
   container.removeChildren();
 
   const leaderboard = [...clientState.leaderboard].sort((a, b) =>
@@ -40,43 +37,7 @@ ${leaderboard
 ${renderLeaderboardPosition(p)}`
   )
   .join('')}
-
-.....connected | ${clientState.connected}
-${logMeter({
-  key: '.......ping ms',
-  value: clientState.pingMs || 0,
-  max: 30,
-  formattedValue: `${clientState.pingMs}ms (${clientState.pingRoundtripMs}ms)`,
-})}
-${logMeter({
-  key: '........F.P.S.',
-  value: clientState.pixiState.fps,
-  max: 75,
-})}
-${logMeter({
-  key: '......delta ms',
-  value: Math.round(clientState.pixiState.deltaMs),
-  max: 20,
-})}
-${logMeter({
-  key: '...fire one ms',
-  value: clientState.gameState?.fire1 || 0,
-  max: 500,
-})}
-${logThrust({
-  key: '........thrust',
-  value: clientState.gameState?.fwdThrst || 0,
-  negChar: '-',
-  posChar: '+',
-})}
-${logThrust({
-  key: '...turn thrust',
-  value: clientState.gameState?.trnThrst || 0,
-})}
-.......elapsed | ${Intl.NumberFormat('en-GB').format(
-    Math.round(clientState.pixiState.timeElapsedMs / 1000)
-  )} s
-  `;
+`;
 
   const dashboardDisplayText = new BitmapText(text, {
     fontName: 'Digital-7 Mono',

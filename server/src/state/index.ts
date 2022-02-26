@@ -17,5 +17,7 @@ export const serverState: IServerState = {
     actors: [],
     bullets: [],
     explosions: [],
+    sfx: [],
+    leaderboard: [],
   },
 };

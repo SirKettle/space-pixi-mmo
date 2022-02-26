@@ -57,6 +57,10 @@ export const connectToServer = (): Promise<TSocket> =>
       ];
     });
 
+    socket.on('leaderboard', (data) => {
+      clientState.leaderboard = data;
+    });
+
     // socket.emit('joinGame');
   });
 
