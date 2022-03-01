@@ -40,19 +40,26 @@ export interface IUser {
 }
 
 export interface IRenderActor {
+  uid: string;
   position: IVector;
   assetKey: keyof typeof crafts;
   frameTextureKey: ETextureKey;
   life: number; // percentage
   rotation: number; // radian value
-  points: number;
   scale?: number; // percentage - default to 1
   isYou?: boolean;
-  kills?: number;
-  hits?: number;
-  shots?: number;
-  deaths?: number;
 }
+
+export type ICompressedRenderActor = [
+  string,
+  IVector,
+  keyof typeof crafts,
+  ETextureKey,
+  number,
+  number,
+  number?,
+  boolean?
+];
 
 export interface IPositionScale {
   position: IVector;
@@ -73,6 +80,7 @@ export interface IRenderBullet {
   radius: number;
   life: number; // percentage
 }
+export type ICompressedRenderBullet = [IVector, number, number];
 
 export interface IBullet extends IRenderBullet {
   isBullet: true;
@@ -94,25 +102,24 @@ export interface IDebugInfo {
 export interface IGameRenderUpdate {
   cameraOffset: IVector;
   actors: IRenderActor[];
+  bullets: IRenderBullet[];
+  explosions: IPositionScale[];
+  sfx: IRenderSfx[];
   nearestTarget?: {
     direction: number;
     distance: number;
     position: IVector;
   };
-  bullets: IRenderBullet[];
-  explosions: IPositionScale[];
-  sfx: IRenderSfx[];
-  fwdThrst?: number;
-  trnThrst?: number;
   fire1?: number;
-  debug?: Record<string, any>;
 }
 
 export interface ILeaderboardPosition {
+  uid: string;
   player: string;
   points: number;
   kills: number;
   hits: number;
+  deaths: number;
   accuracy: number;
 }
 

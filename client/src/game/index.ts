@@ -22,6 +22,7 @@ import { IVector } from '../../../shared/types';
 import { addExplosion, loadParticleAssets } from '~utils/particle';
 import { play } from '~utils/audio';
 import { renderLeaderboard } from '~leaderboard';
+import { removeAndDestroyChildren } from '~utils/container';
 
 const loader = Loader.shared;
 
@@ -86,12 +87,14 @@ export async function initGame() {
   const base = new Container();
   const background = new Container();
   const world = new Container();
+  const animatedWorld = new Container();
   const dash = new Container();
   const debug = new Container();
   const foreground = new Container();
   app.stage.addChild(base);
   app.stage.addChild(background);
   app.stage.addChild(world);
+  app.stage.addChild(animatedWorld);
   app.stage.addChild(dash);
   app.stage.addChild(foreground);
   app.stage.addChild(debug);
@@ -140,8 +143,8 @@ export async function initGame() {
       );
     });
 
-    dash.removeChildren();
-    world.removeChildren();
+    removeAndDestroyChildren(dash);
+    removeAndDestroyChildren(world);
 
     if (clientState.gameState?.actors.length) {
       clientState.gameState?.actors.forEach((a) => {
@@ -208,7 +211,8 @@ export async function initGame() {
     if (clientState.gameEffects.explosions.length) {
       clientState.gameEffects.explosions.forEach((explosion) => {
         addExplosion({
-          container: foreground,
+          container: animatedWorld,
+          startCameraOffset: cameraOffset,
           scale: explosion.scale || 1,
           x: explosion.position.x + screenCameraOffset.x,
           y: explosion.position.y + screenCameraOffset.y,

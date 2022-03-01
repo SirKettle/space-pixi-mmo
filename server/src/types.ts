@@ -22,7 +22,6 @@ export interface IClient {
 }
 
 export interface IActor extends T.IRenderActor {
-  uid: string;
   isBullet: boolean;
   velocity: T.IVector;
   shield: number;
@@ -31,6 +30,11 @@ export interface IActor extends T.IRenderActor {
   fuelCapacity: number;
   rotationSpeed?: number;
   radius: number;
+  kills?: number;
+  hits?: number;
+  shots?: number;
+  deaths?: number;
+  points: number;
 }
 
 // convenience - todo: optimize - should prob use playerToRenderActor func

@@ -41,12 +41,17 @@ export const updateDash = ({
   isPlayer,
 }: IUpdateDash) => {
   const { x, y } = position;
+  const graphic = new Graphics();
   const healthPercentage = actor.life / craftSpec.initialData.life;
   const healthLineWidth = isPlayer ? 15 : 5;
   const spriteRadius = craftSpec.radius * (actor.scale || 1);
   const minHealthRadius = spriteRadius * 1.4 + 10;
 
-  const healthCircle = drawCircle({
+  const playerStats = clientState.leaderboard.find((l) => l.uid === actor.uid);
+
+  // const healthCircle =
+  drawCircle({
+    graphic,
     x,
     y,
     lineWidth: healthLineWidth,
@@ -60,47 +65,44 @@ export const updateDash = ({
     radius: minHealthRadius - clientState.pixiState.sinVariant,
   });
 
-  world.addChild(healthCircle);
+  // world.addChild(healthCircle);
 
-  // const percentage = (num: number) => Math.round(num * 100);
+  if (playerStats) {
+    const percentage = (num: number) => Math.round(num * 100);
 
-  // const hitPercentage =
-  //   typeof actor.shots === 'number' && actor.shots > 1
-  //     ? (actor.hits || 0) / actor.shots
-  //     : undefined;
+    //   const dashboardDisplayText = new BitmapText(
+    //     `${hitPercentage ? percentage(hitPercentage) : 0}%
+    // ${actor.kills || 0} K
+    // ${actor.deaths || 0} D`,
+    //     {
+    //       fontName: 'Digital-7 Mono',
+    //       fontSize: 20,
+    //       align: 'left',
+    //       tint: BLUE,
+    //     }
+    //   );
 
-  //   const dashboardDisplayText = new BitmapText(
-  //     `${hitPercentage ? percentage(hitPercentage) : 0}%
-  // ${actor.kills || 0} K
-  // ${actor.deaths || 0} D`,
-  //     {
-  //       fontName: 'Digital-7 Mono',
-  //       fontSize: 20,
-  //       align: 'left',
-  //       tint: BLUE,
-  //     }
-  //   );
+    //   dashboardDisplayText.x = x - 50;
+    //   dashboardDisplayText.y = y + minHealthRadius + 25;
+    //   dashboardDisplayText.alpha = isPlayer ? 0.5 : 0.25;
+    //   world.addChild(dashboardDisplayText);
 
-  //   dashboardDisplayText.x = x - 50;
-  //   dashboardDisplayText.y = y + minHealthRadius + 25;
-  //   dashboardDisplayText.alpha = isPlayer ? 0.5 : 0.25;
-  //   world.addChild(dashboardDisplayText);
-
-  // renderCurvedText({
-  //   container: world,
-  //   position,
-  //   startRotation: normalizeDirection(
-  //     ((clientState.pixiState.timeElapsedMs % 5000) / 5000) * Math.PI * 2
-  //   ),
-  //   fontStyle: {
-  //     fontSize: 15,
-  //   },
-  //   radius: minHealthRadius + 35,
-  //   message: `${actor.points} - ${actor.kills || 0} KO - ${
-  //     actor.deaths || 0
-  //   } DE - ${hitPercentage ? percentage(hitPercentage) : 0}% AC - `,
-  //   alpha: isPlayer ? 0.4 : 0.2,
-  // });
+    renderCurvedText({
+      container: world,
+      position,
+      startRotation: normalizeDirection(
+        ((clientState.pixiState.timeElapsedMs % 5000) / 5000) * Math.PI * 2
+      ),
+      fontStyle: {
+        fontSize: 15,
+      },
+      radius: minHealthRadius + 35,
+      message: `${playerStats.points} - ${playerStats.kills} KO - ${
+        playerStats.deaths
+      } DE - ${percentage(playerStats.accuracy)}% AC`,
+      alpha: isPlayer ? 0.4 : 0.2,
+    });
+  }
 
   if (isPlayer) {
     const fireButtonPressedTime = clientState.gameState?.fire1 || 0;
@@ -110,7 +112,9 @@ export const updateDash = ({
     // Firepower circle
     if (fireButtonPressedTime > 0) {
       const firePowerLineWidth = firePower * 32;
-      const firePowerCircle = drawCircle({
+      // const firePowerCircle =
+      drawCircle({
+        graphic,
         x: position.x,
         y: position.y,
         lineWidth: firePowerLineWidth,
@@ -123,7 +127,7 @@ export const updateDash = ({
           clientState.pixiState.sinVariant +
           firePowerLineWidth * 0.5,
       });
-      world.addChild(firePowerCircle);
+      // world.addChild(firePowerCircle);
     }
 
     const targetRadius = minHealthRadius + 100;
@@ -139,23 +143,25 @@ export const updateDash = ({
       isNearestTargetInSights &&
       isDirectionMatch(0.075)(actor.rotation, nearestTargetDirection);
 
-    const targets: Graphics[] = [];
-    targets.push(
-      drawCircle({
-        lineWidth: 3,
-        lineColor: isNearestTargetInSights ? RED : BLUE,
-        lineAlpha: isNearestTargetInSights
-          ? isNearestTargetInSightsPrecision
-            ? 0.25
-            : 0.15
-          : 0.05,
-        x,
-        y,
-        radius: targetRadius,
-      })
-    );
+    // const targets: Graphics[] = [];
+    // targets.push(
+    //   );
+    drawCircle({
+      graphic,
+      lineWidth: 3,
+      lineColor: isNearestTargetInSights ? RED : BLUE,
+      lineAlpha: isNearestTargetInSights
+        ? isNearestTargetInSightsPrecision
+          ? 0.25
+          : 0.15
+        : 0.05,
+      x,
+      y,
+      radius: targetRadius,
+    });
 
-    const compassGraphics = [
+    // const compassGraphics =
+    [
       0,
       0.25 * Math.PI,
       0.5 * Math.PI,
@@ -164,8 +170,9 @@ export const updateDash = ({
       1.25 * Math.PI,
       1.5 * Math.PI,
       1.75 * Math.PI,
-    ].map((direction) =>
+    ].forEach((direction) =>
       drawDirection({
+        graphic,
         fromPoint: position,
         direction: direction,
         startRadius: targetRadius - 10,
@@ -176,29 +183,31 @@ export const updateDash = ({
       })
     );
 
-    targets.push(
-      drawDirection({
-        fromPoint: position,
-        direction: actor.rotation,
-        startRadius: targetRadius - 15,
-        lineColor: GREEN,
-        length: 30,
-        lineAlpha: 0.2,
-        lineWidth: 3,
-      })
-    );
+    // targets.push(
+    // )
+    drawDirection({
+      graphic,
+      fromPoint: position,
+      direction: actor.rotation,
+      startRadius: targetRadius - 15,
+      lineColor: GREEN,
+      length: 30,
+      lineAlpha: 0.2,
+      lineWidth: 3,
+    });
 
     if (clientState.gameState?.nearestTarget?.position) {
-      targets.push(
-        drawNavigationArrow({
-          fromPoint: position,
-          direction: clientState.gameState?.nearestTarget?.direction,
-          distance: clientState.gameState?.nearestTarget?.distance,
-          color: RED,
-          startRadius: targetRadius - 15,
-          length: 30,
-        })
-      );
+      // targets.push(
+      //   );
+      drawNavigationArrow({
+        graphic,
+        fromPoint: position,
+        direction: clientState.gameState?.nearestTarget?.direction,
+        distance: clientState.gameState?.nearestTarget?.distance,
+        color: RED,
+        startRadius: targetRadius - 15,
+        length: 30,
+      });
 
       const targetSpritePosition = {
         x:
@@ -211,36 +220,40 @@ export const updateDash = ({
 
       const lineColor = isNearestTargetInSights ? RED : ORANGE;
 
-      targets.push(
-        drawCircle({
-          x: targetSpritePosition.x,
-          y: targetSpritePosition.y,
-          radius: 100,
-          lineColor,
-          lineWidth: 3,
+      drawCircle({
+        graphic,
+        x: targetSpritePosition.x,
+        y: targetSpritePosition.y,
+        radius: 100,
+        lineColor,
+        lineWidth: 3,
+        lineAlpha: isNearestTargetInSightsPrecision ? 0.3 : 0.2,
+      });
+      // targets.push(
+      // );
+
+      // const targetLines =
+      [0, 0.5 * Math.PI, Math.PI, 1.5 * Math.PI].forEach((direction) =>
+        drawDirection({
+          graphic,
+          fromPoint: targetSpritePosition,
+          direction: direction,
+          startRadius: isNearestTargetInSightsPrecision ? 60 : 75,
+          length: isNearestTargetInSightsPrecision ? 80 : 50,
           lineAlpha: isNearestTargetInSightsPrecision ? 0.3 : 0.2,
+          lineWidth: 3,
+          lineColor,
         })
       );
-
-      const targetLines = [0, 0.5 * Math.PI, Math.PI, 1.5 * Math.PI].map(
-        (direction) =>
-          drawDirection({
-            fromPoint: targetSpritePosition,
-            direction: direction,
-            startRadius: isNearestTargetInSightsPrecision ? 60 : 75,
-            length: isNearestTargetInSightsPrecision ? 80 : 50,
-            lineAlpha: isNearestTargetInSightsPrecision ? 0.3 : 0.2,
-            lineWidth: 3,
-            lineColor,
-          })
-      );
-      targetLines.forEach((t) => {
-        world.addChild(t);
-      });
+      // targetLines.forEach((t) => {
+      //   world.addChild(t);
+      // });
     }
 
-    [...targets, ...compassGraphics].forEach((t) => {
-      world.addChild(t);
-    });
+    // [...targets, ...compassGraphics].forEach((t) => {
+    //   world.addChild(t);
+    // });
+
+    world.addChild(graphic);
   }
 };

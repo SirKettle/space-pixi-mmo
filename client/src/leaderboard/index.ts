@@ -4,6 +4,7 @@ import { clientState } from '~state';
 import { GREEN } from '../../../shared/constants/color';
 import * as T from '../../../shared/types';
 import { times } from 'ramda';
+import { removeAndDestroyChildren } from '~utils/container';
 
 const strFixedLength =
   (length: number, padChar: string, padBefore?: boolean) =>
@@ -23,7 +24,7 @@ const renderLeaderboardPosition = (pos: T.ILeaderboardPosition): string => {
 };
 
 export const renderLeaderboard = (container: Container) => {
-  container.removeChildren();
+  removeAndDestroyChildren(container);
 
   const leaderboard = [...clientState.leaderboard].sort((a, b) =>
     a.points < b.points ? 1 : -1

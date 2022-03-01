@@ -86,6 +86,7 @@ export const updateAllPlayers = () => {
 
 export const playerToRender = (player: IPlayerState): IRenderActor => {
   const renderActorKeys = [
+    'uid',
     'position',
     'assetKey',
     'frameTextureKey',
@@ -93,11 +94,11 @@ export const playerToRender = (player: IPlayerState): IRenderActor => {
     'rotation',
     'scale',
     'isYou',
-    'shots',
-    'hits',
-    'kills',
-    'deaths',
-    'points',
+    // 'shots',
+    // 'hits',
+    // 'kills',
+    // 'deaths',
+    // 'points',
   ];
   return pick(renderActorKeys, player);
 };

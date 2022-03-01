@@ -97,8 +97,8 @@ export function gameLoop() {
             .map(bulletToRender)
             .filter(shouldRender(cameraOffset)), // will want to filter this to only in view later on
           fire1: clientUserInput?.fire1.downMs || 0,
-          fwdThrst: clientUserInput?.forwardThruster || 0,
-          trnThrst: clientUserInput?.turnThruster || 0,
+          // fwdThrst: clientUserInput?.forwardThruster || 0,
+          // trnThrst: clientUserInput?.turnThruster || 0,
           explosions: serverState.gameState.explosions.filter(
             shouldRender(cameraOffset)
           ),
@@ -115,10 +115,10 @@ export function gameLoop() {
                 position: nearestPlayer.position,
               }
             : undefined,
-          debug: {
-            serverDeltaMs: { value: deltaMs },
-            userInputs: serverState.userInput,
-          },
+          // debug: {
+          //   serverDeltaMs: { value: deltaMs },
+          //   userInputs: serverState.userInput,
+          // },
         });
       });
   }
@@ -175,10 +175,12 @@ export function informationLoop() {
         c.socket.emit(
           'leaderboard',
           players.map((p) => ({
+            uid: p.uid,
             player: `${getPlayerName(p.clientId)}${p.isYou ? ' (YOU)' : ''}`,
             points: p.points,
             hits: p.hits || 0,
             kills: p.kills || 0,
+            deaths: p.deaths || 0,
             accuracy: (p.hits || 0) / (p.shots || 1),
           }))
         );

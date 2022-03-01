@@ -9,8 +9,12 @@ import {
 
 import { getFrameRects } from '../utils/spritesheet';
 import explosion200Image from '../static/assets/images/sprites/animated-explosion-200.png';
-import { IRect } from '../../../shared/types';
-import { normalizeDirection } from '../../../shared/utils/physics';
+import { IRect, IVector } from '../../../shared/types';
+import {
+  defaultVector,
+  normalizeDirection,
+} from '../../../shared/utils/physics';
+import { clientState } from '~state';
 
 interface IParticleSpec {
   imageUrl: string;
@@ -68,6 +72,7 @@ interface IAddAnimatedParticle {
   container: Container;
   x: number;
   y: number;
+  startCameraOffset: IVector;
   scale?: number;
   rotation?: number;
   loop?: boolean;
@@ -77,6 +82,7 @@ export function addAnimatedParticle({
   container,
   x,
   y,
+  startCameraOffset,
   scale = 1,
   rotation = normalizeDirection(Math.random() * Math.PI * 2),
   loop = false,
@@ -88,8 +94,18 @@ export function addAnimatedParticle({
     }
     const sprite = new AnimatedSprite(textures.frameTextures);
 
+    sprite.onFrameChange = () => {
+      const cameraOffset: IVector = {
+        ...defaultVector,
+        ...clientState.gameState?.cameraOffset,
+      };
+      sprite.x = x + (startCameraOffset.x - cameraOffset.x);
+      sprite.y = y + (startCameraOffset.y - cameraOffset.y);
+    };
+
     sprite.onComplete = () => {
       sprite.parent.removeChild(sprite);
+      sprite.destroy();
     };
     sprite.x = x;
     sprite.y = y;
@@ -106,13 +122,21 @@ export function addAnimatedParticle({
 
 interface IAddExplosion {
   container: Container;
+  startCameraOffset: IVector;
   x: number;
   y: number;
   scale?: number;
 }
-export function addExplosion({ container, scale = 1, x, y }: IAddExplosion) {
+export function addExplosion({
+  container,
+  startCameraOffset,
+  scale = 1,
+  x,
+  y,
+}: IAddExplosion) {
   return addAnimatedParticle({
     container,
+    startCameraOffset,
     scale,
     x,
     y,
